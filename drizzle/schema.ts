@@ -10,11 +10,18 @@ import {
   unique,
 } from 'drizzle-orm/pg-core'
 
+export const companies = pgTable('companies', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export const participants = pgTable('participants', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   avatarUrl: text('avatar_url'),
   isActive: boolean('is_active').notNull().default(true),
+  companyId: uuid('company_id').references(() => companies.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

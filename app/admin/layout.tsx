@@ -8,6 +8,7 @@ const navItems = [
   { href: '/admin/overview', label: 'Overview' },
   { href: '/admin/payments', label: 'Payments' },
   { href: '/admin/participants', label: 'Participants' },
+  { href: '/admin/companies', label: 'Companies' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Settings' },
   { href: '/admin/kiosk-tokens', label: 'Kiosk Devices' },

@@ -14,11 +14,17 @@ const DAYS = [
   { label: 'Sun', value: 0 },
 ]
 
+interface Company {
+  id: string
+  name: string
+}
+
 interface Participant {
   id: string
   name: string
   avatarUrl: string | null
   isActive: boolean
+  companyId?: string | null
 }
 
 interface Props {
@@ -34,7 +40,16 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [fixedDays, setFixedDays] = useState<Set<number>>(new Set())
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [companyId, setCompanyId] = useState<string>(participant?.companyId ?? '')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch('/api/admin/companies')
+      .then(r => r.json())
+      .then((data: Company[]) => setCompanies(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!participant) return
@@ -79,7 +94,7 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays) }),
+        body: JSON.stringify({ name: name.trim(), avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays), companyId: companyId || null }),
       })
 
       if (!res.ok) throw new Error()
@@ -169,6 +184,20 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
                 )
               })}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
+            <select
+              value={companyId}
+              onChange={(e) => setCompanyId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 text-sm"
+            >
+              <option value="">No company</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
