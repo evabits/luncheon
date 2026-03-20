@@ -6,6 +6,7 @@ import {
   timestamp,
   date,
   numeric,
+  integer,
   unique,
 } from 'drizzle-orm/pg-core'
 
@@ -47,6 +48,20 @@ export const attendances = pgTable(
   },
   (t) => [unique().on(t.sessionId, t.participantId)]
 )
+
+export const participantFixedDays = pgTable('participant_fixed_days', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  participantId: uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  dayOfWeek: integer('day_of_week').notNull(), // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+}, (t) => [unique().on(t.participantId, t.dayOfWeek)])
+
+export const attendanceRemovals = pgTable('attendance_removals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sessionId: uuid('session_id').notNull().references(() => lunchSessions.id, { onDelete: 'cascade' }),
+  participantId: uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  wasFixedDay: boolean('was_fixed_day').notNull().default(false),
+  removedAt: timestamp('removed_at', { withTimezone: true }).notNull().defaultNow(),
+})
 
 export const config = pgTable('config', {
   id: uuid('id').primaryKey().defaultRandom(),

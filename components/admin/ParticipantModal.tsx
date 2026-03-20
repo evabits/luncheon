@@ -1,8 +1,18 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { AvatarInitials } from '@/components/ui/avatar-initials'
+
+const DAYS = [
+  { label: 'Mon', value: 1 },
+  { label: 'Tue', value: 2 },
+  { label: 'Wed', value: 3 },
+  { label: 'Thu', value: 4 },
+  { label: 'Fri', value: 5 },
+  { label: 'Sat', value: 6 },
+  { label: 'Sun', value: 0 },
+]
 
 interface Participant {
   id: string
@@ -23,7 +33,16 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [fixedDays, setFixedDays] = useState<Set<number>>(new Set())
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!participant) return
+    fetch(`/api/admin/participants/${participant.id}/fixed-days`)
+      .then(r => r.json())
+      .then((days: number[]) => setFixedDays(new Set(days)))
+      .catch(() => {})
+  }, [participant?.id])
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -60,7 +79,7 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), avatarUrl: avatarUrl || null }),
+        body: JSON.stringify({ name: name.trim(), avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays) }),
       })
 
       if (!res.ok) throw new Error()
@@ -120,6 +139,36 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
               className="hidden"
               onChange={handleFileChange}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fixed days</label>
+            <div className="flex gap-2 flex-wrap">
+              {DAYS.map(({ label, value }) => {
+                const checked = fixedDays.has(value)
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setFixedDays(prev => {
+                        const next = new Set(prev)
+                        if (next.has(value)) next.delete(value)
+                        else next.add(value)
+                        return next
+                      })
+                    }}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      checked
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-400'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}

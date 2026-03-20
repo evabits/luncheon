@@ -15,6 +15,13 @@
       "when": 1774018740007,
       "tag": "0001_steady_shatterstar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774020638868,
+      "tag": "0002_nosy_wendigo",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ const navItems = [
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Settings' },
   { href: '/admin/kiosk-tokens', label: 'Kiosk Devices' },
+  { href: '/admin/removals', label: 'Attendance Log' },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

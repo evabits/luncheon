@@ -20,10 +20,10 @@ export default async function MeLayout({ children }: { children: React.ReactNode
               <Link href="/me" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Dashboard</Link>
               <Link href="/me/history" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">History</Link>
               <Link href="/me/add-lunch" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Add Lunch</Link>
+              <Link href="/me/schedule" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Schedule</Link>
             </nav>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{user.email}</span>
+          <div className="flex items-center gap-1">
             {user.role === 'admin' && (
               <Link href="/admin/overview" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 Admin ↗

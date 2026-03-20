@@ -8,11 +8,12 @@ interface Props {
   name: string
   avatarUrl: string | null
   attending: boolean
+  fixedDay?: boolean
   loading: boolean
   onToggle: (id: string) => void
 }
 
-export function ParticipantCard({ id, name, avatarUrl, attending, loading, onToggle }: Props) {
+export function ParticipantCard({ id, name, avatarUrl, attending, fixedDay, loading, onToggle }: Props) {
   return (
     <button
       onClick={() => onToggle(id)}
@@ -25,6 +26,7 @@ export function ParticipantCard({ id, name, avatarUrl, attending, loading, onTog
           : 'bg-white/5 ring-2 ring-white/10 hover:ring-white/30'
         }
         ${loading ? 'opacity-60 cursor-wait' : 'cursor-pointer'}
+        ${fixedDay ? 'border-b-2 border-blue-400' : ''}
       `}
     >
       <div className="relative">

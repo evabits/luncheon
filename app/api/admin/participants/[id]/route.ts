@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { participants, users } from '@/drizzle/schema'
+import { participants, users, participantFixedDays } from '@/drizzle/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json()
-  const { name, avatarUrl, isActive } = body
+  const { name, avatarUrl, isActive, fixedDays } = body
 
   const updateData: Record<string, unknown> = {}
   if (name !== undefined) updateData.name = name
@@ -21,6 +21,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .returning()
 
   if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  if (Array.isArray(fixedDays)) {
+    await db.delete(participantFixedDays).where(eq(participantFixedDays.participantId, id))
+    if (fixedDays.length > 0) {
+      await db.insert(participantFixedDays).values(
+        fixedDays.map((dow: number) => ({ participantId: id, dayOfWeek: dow }))
+      )
+    }
+  }
 
   return NextResponse.json(updated)
 }

@@ -1,5 +1,5 @@
 import { db } from '../db'
-import { lunchSessions, attendances, participants, config } from '@/drizzle/schema'
+import { lunchSessions, attendances, participants, config, participantFixedDays } from '@/drizzle/schema'
 import { eq, and, sql } from 'drizzle-orm'
 
 export async function getOrCreateTodaySession() {
@@ -82,6 +82,34 @@ export async function getParticipantHistory(participantId: string) {
     attended: boolean
     signed_in_at: string | null
   }>
+}
+
+export async function autoAddFixedDayAttendances(sessionId: string, date: string) {
+  const dow = new Date(date + 'T12:00:00').getDay()
+
+  const fixed = await db
+    .select({ participantId: participantFixedDays.participantId })
+    .from(participantFixedDays)
+    .innerJoin(participants, eq(participantFixedDays.participantId, participants.id))
+    .where(and(
+      eq(participantFixedDays.dayOfWeek, dow),
+      eq(participants.isActive, true),
+    ))
+
+  for (const { participantId } of fixed) {
+    await db.insert(attendances)
+      .values({ sessionId, participantId })
+      .onConflictDoNothing()
+  }
+}
+
+export async function getFixedDayParticipantIds(date: string): Promise<Set<string>> {
+  const dow = new Date(date + 'T12:00:00').getDay()
+  const rows = await db
+    .select({ participantId: participantFixedDays.participantId })
+    .from(participantFixedDays)
+    .where(eq(participantFixedDays.dayOfWeek, dow))
+  return new Set(rows.map(r => r.participantId))
 }
 
 export async function getMissedSessions(participantId: string, limitDays = 30) {

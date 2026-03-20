@@ -8,6 +8,7 @@ interface Participant {
   name: string
   avatarUrl: string | null
   attending: boolean
+  fixedDay?: boolean
 }
 
 interface Session {
