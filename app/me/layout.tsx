@@ -21,6 +21,7 @@ export default async function MeLayout({ children }: { children: React.ReactNode
               <Link href="/me/history" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">History</Link>
               <Link href="/me/add-lunch" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Add Lunch</Link>
               <Link href="/me/schedule" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Schedule</Link>
+              <Link href="/me/billing" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Billing</Link>
             </nav>
           </div>
           <div className="flex items-center gap-1">

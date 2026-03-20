@@ -17,11 +17,11 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-function Navigator({ year, month }: { year: number; month: number }) {
+function Navigator({ year, month, basePath = '/admin/overview' }: { year: number; month: number; basePath?: string }) {
   const router = useRouter()
 
   function go(y: number, m: number) {
-    router.push(`/admin/overview?year=${y}&month=${m}`)
+    router.push(`${basePath}?year=${y}&month=${m}`)
   }
 
   function prev() {

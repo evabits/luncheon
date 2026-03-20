@@ -6,11 +6,12 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 const navItems = [
   { href: '/admin/overview', label: 'Overview' },
+  { href: '/admin/payments', label: 'Payments' },
   { href: '/admin/participants', label: 'Participants' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Settings' },
   { href: '/admin/kiosk-tokens', label: 'Kiosk Devices' },
-  { href: '/admin/removals', label: 'Attendance Log' },
+  { href: '/admin/removals', label: 'Activity Log' },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

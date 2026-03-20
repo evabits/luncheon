@@ -85,6 +85,18 @@ export const oauthAccounts = pgTable('oauth_accounts', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [unique().on(t.provider, t.providerAccountId)])
 
+export const payments = pgTable('payments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  participantId: uuid('participant_id')
+    .notNull()
+    .references(() => participants.id, { onDelete: 'cascade' }),
+  year: integer('year').notNull(),
+  month: integer('month').notNull(),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  note: text('note'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // Temporary setup codes for kiosk device activation (short-lived)
 export const kioskSetupCodes = pgTable('kiosk_setup_codes', {
   id: uuid('id').primaryKey().defaultRandom(),
