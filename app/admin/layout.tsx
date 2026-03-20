@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 const navItems = [
   { href: '/admin/overview', label: 'Overview' },
   { href: '/admin/participants', label: 'Participants' },
+  { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Settings' },
   { href: '/admin/kiosk-tokens', label: 'Kiosk Devices' },
 ]
