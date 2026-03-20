@@ -45,7 +45,7 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-8">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Luncheon</h1>
+          <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-20 mx-auto mb-2" />
           <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to your account</p>
         </div>
 

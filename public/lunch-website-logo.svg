@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220" width="640" height="220">
+  <defs>
+    <linearGradient id="bun" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#F7C66B"/>
+      <stop offset="100%" stop-color="#E39A38"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#5DBB63"/>
+      <stop offset="100%" stop-color="#7AC943"/>
+    </linearGradient>
+    <style>
+      .word { font: 700 72px Arial, sans-serif; }
+      .tag  { font: 500 22px Arial, sans-serif; letter-spacing: 3px; }
+    </style>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(20,10)">
+    <rect width="570" height="160" rx="36" fill="#FFF7ED"/>
+    <g transform="translate(15,15)">
+      <path d="M15 55c0-25 20-40 45-40h40c25 0 45 15 45 40v10H15z"
+            fill="url(#bun)" stroke="#C98024" stroke-width="3"/>
+      <path d="M18 75c10-8 20-8 30 0s20 8 30 0s20-8 30 0s20 8 30 0v12H18z"
+            fill="#E25B4B"/>
+      <rect x="15" y="85" width="130" height="12" rx="6" fill="url(#leaf)"/>
+      <rect x="15" y="100" width="130" height="20" rx="10"
+            fill="url(#bun)" stroke="#C98024" stroke-width="3"/>
+    </g>
+  </g>
+
+ <!-- Wordmark -->
+  <g transform="translate(220,98)">
+    <text class="word" x="0" y="0" fill="#2F3A2F">Lunch</text>
+    <circle cx="233" cy="-23" r="10" fill="#E25B4B"/>
+    <path d="M233 -42c4-10 10-14 18-16" fill="none" stroke="#7A4B2B" stroke-width="4" stroke-linecap="round"/>
+    <path d="M247 -48c12-4 22 1 27 12c-11 1-21-2-27-12z" fill="#5DBB63"/>
+    <text class="tag" x="4" y="48" fill="#6C7A6C">FRESH • FAST • FRIENDLY</text>
+  </g>
+</svg>

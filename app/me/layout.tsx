@@ -15,7 +15,7 @@ export default async function MeLayout({ children }: { children: React.ReactNode
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="font-bold text-gray-900 dark:text-white">Luncheon</h1>
+            <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-8 w-auto" />
             <nav className="flex gap-4 text-sm">
               <Link href="/me" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Dashboard</Link>
               <Link href="/me/history" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">History</Link>

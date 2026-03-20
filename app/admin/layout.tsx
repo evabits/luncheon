@@ -19,9 +19,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-950">
       <aside className="w-56 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-          <h1 className="font-bold text-gray-900 dark:text-white">Luncheon</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Admin</p>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-10 w-auto" />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 px-1">Admin</p>
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => (
