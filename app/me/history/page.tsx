@@ -22,10 +22,10 @@ export default async function HistoryPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Lunch History</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Lunch History</h2>
 
       {months.size === 0 && (
-        <p className="text-gray-500">No lunch sessions found.</p>
+        <p className="text-gray-500 dark:text-gray-400">No lunch sessions found.</p>
       )}
 
       {Array.from(months.entries()).map(([key, rows]) => {
@@ -40,15 +40,15 @@ export default async function HistoryPage() {
         return (
           <div key={key}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900">{monthLabel}</h3>
-              <span className="text-sm text-gray-500">
+              <h3 className="font-semibold text-gray-900 dark:text-white">{monthLabel}</h3>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {attended.length} lunches · €{totalCost.toFixed(2)}
               </span>
             </div>
-            <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
               {rows.map((row) => (
                 <div key={row.session_id} className="px-4 py-3 flex items-center justify-between">
-                  <span className="text-gray-700">
+                  <span className="text-gray-700 dark:text-gray-300">
                     {new Date(row.date).toLocaleDateString('en-US', {
                       weekday: 'short',
                       month: 'short',
@@ -58,11 +58,11 @@ export default async function HistoryPage() {
                   <div className="flex items-center gap-3">
                     {row.attended ? (
                       <>
-                        <span className="text-gray-500 text-sm">€{Number(row.cost).toFixed(2)}</span>
-                        <span className="text-green-600 text-sm font-medium">Attended</span>
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">€{Number(row.cost).toFixed(2)}</span>
+                        <span className="text-green-600 dark:text-green-400 text-sm font-medium">Attended</span>
                       </>
                     ) : (
-                      <span className="text-gray-400 text-sm">Not attended</span>
+                      <span className="text-gray-400 dark:text-gray-600 text-sm">Not attended</span>
                     )}
                   </div>
                 </div>

@@ -40,24 +40,24 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
         >
           + Add Participant
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Participant</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Participant</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Status</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {participants.map((p) => (
-              <tr key={p.id} className="hover:bg-gray-50">
+              <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     {p.avatarUrl ? (
@@ -71,14 +71,16 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
                     ) : (
                       <AvatarInitials name={p.name} className="w-9 h-9 text-sm" />
                     )}
-                    <span className={`font-medium ${p.isActive ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <span className={`font-medium ${p.isActive ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}`}>
                       {p.name}
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                    p.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                    p.isActive
+                      ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                   }`}>
                     {p.isActive ? 'Active' : 'Inactive'}
                   </span>
@@ -87,19 +89,19 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => setEditingParticipant(p)}
-                      className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => setCreatingUserFor(p)}
-                      className="text-sm text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50"
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30"
                     >
                       Create login
                     </button>
                     <button
                       onClick={() => toggleActive(p)}
-                      className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
                       {p.isActive ? 'Deactivate' : 'Reactivate'}
                     </button>

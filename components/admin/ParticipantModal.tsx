@@ -74,9 +74,9 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-xl border border-transparent dark:border-gray-800">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="font-semibold text-gray-900 dark:text-white">
             {participant ? 'Edit Participant' : 'Add Participant'}
           </h3>
         </div>
@@ -103,12 +103,12 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
               </div>
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                 placeholder="Full name"
                 required
               />
@@ -128,14 +128,14 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium"
+              className="flex-1 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || uploading || !name.trim()}
-              className="flex-1 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 text-sm font-medium"
+              className="flex-1 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 text-sm font-medium"
             >
               {saving ? 'Saving...' : 'Save'}
             </button>

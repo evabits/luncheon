@@ -52,7 +52,7 @@ export async function getMonthlyReport(year: number, month: number) {
     ORDER BY p.name
   `)
 
-  return rows as unknown as Array<{
+  return rows.rows as unknown as Array<{
     id: string
     name: string
     avatar_url: string | null
@@ -75,7 +75,7 @@ export async function getParticipantHistory(participantId: string) {
     ORDER BY ls.date DESC
   `)
 
-  return rows as unknown as Array<{
+  return rows.rows as unknown as Array<{
     session_id: string
     date: string
     cost: string
@@ -96,5 +96,5 @@ export async function getMissedSessions(participantId: string, limitDays = 30) {
     ORDER BY ls.date DESC
   `)
 
-  return rows as unknown as Array<{ id: string; date: string; cost: string }>
+  return rows.rows as unknown as Array<{ id: string; date: string; cost: string }>
 }

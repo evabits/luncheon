@@ -1,5 +1,5 @@
 import { getMonthlyReport } from '@/lib/queries/sessions'
-import { MonthlyTable } from '@/components/admin/MonthlyTable'
+import { MonthlyTable, MonthlyTableNavigator } from '@/components/admin/MonthlyTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,23 +27,23 @@ export default async function OverviewPage({ searchParams }: Props) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          {MONTH_NAMES[month - 1]} {year}
+          <span className="text-gray-900 dark:text-white">{MONTH_NAMES[month - 1]} {year}</span>
         </h2>
-        <MonthlyTable.Navigator year={year} month={month} />
+        <MonthlyTableNavigator year={year} month={month} />
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500">Total lunches</div>
-          <div className="text-3xl font-bold text-gray-900 mt-1">{totalLunches}</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Total lunches</div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{totalLunches}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500">Total cost</div>
-          <div className="text-3xl font-bold text-gray-900 mt-1">€{totalCost.toFixed(2)}</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Total cost</div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white mt-1">€{totalCost.toFixed(2)}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500">Participants</div>
-          <div className="text-3xl font-bold text-gray-900 mt-1">{report.length}</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Participants</div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{report.length}</div>
         </div>
       </div>
 

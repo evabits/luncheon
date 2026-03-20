@@ -11,8 +11,8 @@ export default async function MePage() {
   if (!participantId) {
     return (
       <div className="text-center py-16">
-        <p className="text-gray-500">Your account is not linked to a participant yet.</p>
-        <p className="text-sm text-gray-400 mt-1">Ask an admin to link your account.</p>
+        <p className="text-gray-500 dark:text-gray-400">Your account is not linked to a participant yet.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Ask an admin to link your account.</p>
       </div>
     )
   }
@@ -33,29 +33,29 @@ export default async function MePage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Your Lunch Summary</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Lunch Summary</h2>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="text-sm text-gray-500">{monthName} lunches</div>
-          <div className="text-4xl font-bold text-gray-900 mt-1">{attended.length}</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+          <div className="text-sm text-gray-500 dark:text-gray-400">{monthName} lunches</div>
+          <div className="text-4xl font-bold text-gray-900 dark:text-white mt-1">{attended.length}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="text-sm text-gray-500">{monthName} cost</div>
-          <div className="text-4xl font-bold text-gray-900 mt-1">€{totalCost.toFixed(2)}</div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+          <div className="text-sm text-gray-500 dark:text-gray-400">{monthName} cost</div>
+          <div className="text-4xl font-bold text-gray-900 dark:text-white mt-1">€{totalCost.toFixed(2)}</div>
         </div>
       </div>
 
       <div className="flex gap-3">
         <Link
           href="/me/history"
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100"
+          className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           View full history
         </Link>
         <Link
           href="/me/add-lunch"
-          className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800"
+          className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100"
         >
           Add forgotten lunch
         </Link>
@@ -63,18 +63,18 @@ export default async function MePage() {
 
       {attended.length > 0 && (
         <div>
-          <h3 className="font-medium text-gray-900 mb-3">This month</h3>
-          <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+          <h3 className="font-medium text-gray-900 dark:text-white mb-3">This month</h3>
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
             {attended.map((h) => (
               <div key={h.session_id} className="px-4 py-3 flex items-center justify-between">
-                <span className="text-gray-700">
+                <span className="text-gray-700 dark:text-gray-300">
                   {new Date(h.date).toLocaleDateString('en-US', {
                     weekday: 'short',
                     month: 'short',
                     day: 'numeric',
                   })}
                 </span>
-                <span className="text-gray-500 text-sm">€{Number(h.cost).toFixed(2)}</span>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">€{Number(h.cost).toFixed(2)}</span>
               </div>
             ))}
           </div>

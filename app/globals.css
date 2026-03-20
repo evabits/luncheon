@@ -4,6 +4,9 @@
   --font-sans: var(--font-geist);
 }
 
+/* Class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Prevent double-tap zoom on kiosk touch targets */
 .touch-manipulation {
   touch-action: manipulation;
