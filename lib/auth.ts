@@ -45,8 +45,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
         const email = user.email!
-        const allowedDomain = process.env.GOOGLE_ALLOWED_DOMAIN ?? 'evabits.com'
-        if (!email.endsWith(`@${allowedDomain}`)) {
+        const allowedDomains = (process.env.GOOGLE_ALLOWED_DOMAIN ?? 'evabits.com').split(',')
+        const emailDomain = email.split('@')[1]
+        if (!allowedDomains.includes(emailDomain)) {
           return '/login?error=wrong_domain'
         }
 

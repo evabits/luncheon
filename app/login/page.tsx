@@ -15,7 +15,7 @@ function LoginForm() {
   const urlError = searchParams.get('error')
   const oauthError =
     urlError === 'wrong_domain'
-      ? 'Only @evabits.com accounts can sign in with Google.'
+      ? 'Your Google account domain is not allowed to sign in.'
       : urlError === 'OAuthAccountNotLinked'
         ? 'This account is already linked to another sign-in method.'
         : null
