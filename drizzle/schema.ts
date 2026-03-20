@@ -20,7 +20,7 @@ export const participants = pgTable('participants', {
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').unique().notNull(),
-  passwordHash: text('password_hash').notNull(),
+  passwordHash: text('password_hash'),
   role: text('role', { enum: ['admin', 'user'] }).notNull().default('user'),
   participantId: uuid('participant_id').references(() => participants.id),
   mustChangePassword: boolean('must_change_password').notNull().default(false),
@@ -61,6 +61,14 @@ export const kioskTokens = pgTable('kiosk_tokens', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   lastUsed: timestamp('last_used', { withTimezone: true }),
 })
+
+export const oauthAccounts = pgTable('oauth_accounts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  provider: text('provider').notNull(),
+  providerAccountId: text('provider_account_id').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [unique().on(t.provider, t.providerAccountId)])
 
 // Temporary setup codes for kiosk device activation (short-lived)
 export const kioskSetupCodes = pgTable('kiosk_setup_codes', {

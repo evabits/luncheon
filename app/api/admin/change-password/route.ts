@@ -23,6 +23,10 @@ export async function POST(req: Request) {
 
   if (!user) return Response.json({ error: 'User not found' }, { status: 404 })
 
+  if (!user.passwordHash) {
+    return Response.json({ error: 'This account uses Google sign-in and has no password.' }, { status: 400 })
+  }
+
   const valid = await bcrypt.compare(currentPassword, user.passwordHash)
   if (!valid) return Response.json({ error: 'Current password is incorrect' }, { status: 400 })
 

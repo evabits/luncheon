@@ -24,6 +24,11 @@ export default async function MeLayout({ children }: { children: React.ReactNode
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">{user.email}</span>
+            {user.role === 'admin' && (
+              <Link href="/admin/overview" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                Admin ↗
+              </Link>
+            )}
             <ThemeToggle />
             <SignOutButton />
           </div>
