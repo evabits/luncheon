@@ -22,6 +22,7 @@ interface Company {
 interface Participant {
   id: string
   name: string
+  email: string | null
   avatarUrl: string | null
   isActive: boolean
   companyId?: string | null
@@ -35,6 +36,7 @@ interface Props {
 
 export function ParticipantModal({ participant, onClose, onSaved }: Props) {
   const [name, setName] = useState(participant?.name ?? '')
+  const [email, setEmail] = useState(participant?.email ?? '')
   const [avatarUrl, setAvatarUrl] = useState(participant?.avatarUrl ?? '')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -94,7 +96,7 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays), companyId: companyId || null }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim() || null, avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays), companyId: companyId || null }),
       })
 
       if (!res.ok) throw new Error()
@@ -153,6 +155,17 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
               accept="image/*"
               className="hidden"
               onChange={handleFileChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email (for billing)</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+              placeholder="name@example.com"
             />
           </div>
 

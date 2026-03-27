@@ -9,7 +9,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { costPerLunch } = await req.json()
+  const { costPerLunch, paymentInstructions } = await req.json()
 
   if (costPerLunch === undefined || isNaN(Number(costPerLunch))) {
     return NextResponse.json({ error: 'Invalid cost' }, { status: 400 })
@@ -17,17 +17,17 @@ export async function PATCH(req: NextRequest) {
 
   const existing = await getConfig()
 
+  const values = {
+    costPerLunch: String(costPerLunch),
+    paymentInstructions: paymentInstructions ?? null,
+    updatedAt: new Date(),
+  }
+
   if (existing) {
-    const [updated] = await db
-      .update(config)
-      .set({ costPerLunch: String(costPerLunch), updatedAt: new Date() })
-      .returning()
+    const [updated] = await db.update(config).set(values).returning()
     return NextResponse.json(updated)
   }
 
-  const [created] = await db
-    .insert(config)
-    .values({ costPerLunch: String(costPerLunch) })
-    .returning()
+  const [created] = await db.insert(config).values(values).returning()
   return NextResponse.json(created)
 }

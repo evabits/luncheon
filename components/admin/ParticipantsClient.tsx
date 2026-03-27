@@ -9,8 +9,11 @@ import { CreateUserModal } from './CreateUserModal'
 interface Participant {
   id: string
   name: string
+  email: string | null
   avatarUrl: string | null
   isActive: boolean
+  companyId: string | null
+  companyName: string | null
   createdAt: Date
 }
 
@@ -71,9 +74,14 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
                     ) : (
                       <AvatarInitials name={p.name} className="w-9 h-9 text-sm" />
                     )}
-                    <span className={`font-medium ${p.isActive ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}`}>
-                      {p.name}
-                    </span>
+                    <div>
+                      <span className={`font-medium ${p.isActive ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}`}>
+                        {p.name}
+                      </span>
+                      {p.email && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{p.email}</div>
+                      )}
+                    </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">

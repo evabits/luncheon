@@ -7,10 +7,11 @@ import bcrypt from 'bcryptjs'
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json()
-  const { name, avatarUrl, isActive, fixedDays, companyId } = body
+  const { name, avatarUrl, email, isActive, fixedDays, companyId } = body
 
   const updateData: Record<string, unknown> = {}
   if (name !== undefined) updateData.name = name
+  if (email !== undefined) updateData.email = email
   if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl
   if (isActive !== undefined) updateData.isActive = isActive
   if (companyId !== undefined) updateData.companyId = companyId

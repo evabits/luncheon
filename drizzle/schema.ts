@@ -19,6 +19,7 @@ export const companies = pgTable('companies', {
 export const participants = pgTable('participants', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
+  email: text('email'),
   avatarUrl: text('avatar_url'),
   isActive: boolean('is_active').notNull().default(true),
   companyId: uuid('company_id').references(() => companies.id),
@@ -73,6 +74,7 @@ export const attendanceRemovals = pgTable('attendance_removals', {
 export const config = pgTable('config', {
   id: uuid('id').primaryKey().defaultRandom(),
   costPerLunch: numeric('cost_per_lunch', { precision: 10, scale: 2 }).notNull().default('85.00'),
+  paymentInstructions: text('payment_instructions'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
