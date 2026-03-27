@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { users } from '@/drizzle/schema'
+import { users, participants } from '@/drizzle/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
@@ -20,9 +20,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const update: Record<string, unknown> = {}
   if (body.role !== undefined) update.role = body.role
+  if (body.participantId !== undefined) update.participantId = body.participantId
   if (body.password !== undefined) {
     update.passwordHash = await bcrypt.hash(body.password, 12)
     update.mustChangePassword = true
+  }
+
+  // Optionally create a new participant and link it
+  if (body.newParticipantName) {
+    const [created] = await db
+      .insert(participants)
+      .values({ name: body.newParticipantName })
+      .returning()
+    update.participantId = created.id
   }
 
   const [updated] = await db.update(users).set(update).where(eq(users.id, id)).returning()

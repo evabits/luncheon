@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface User {
   id: string
@@ -180,10 +180,143 @@ function ResetPasswordModal({ user, onClose }: { user: User; onClose: () => void
   )
 }
 
+interface Participant {
+  id: string
+  name: string
+}
+
+function LinkParticipantModal({ user, takenIds, onClose, onLinked }: {
+  user: User
+  takenIds: Set<string>
+  onClose: () => void
+  onLinked: () => void
+}) {
+  const [participants, setParticipants] = useState<Participant[]>([])
+  const [mode, setMode] = useState<'existing' | 'new'>('existing')
+  const [selectedId, setSelectedId] = useState('')
+  const [newName, setNewName] = useState(user.email.split('@')[0])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetch('/api/admin/participants')
+      .then((r) => r.json())
+      .then((data: Participant[]) => {
+        setParticipants(data.filter((p) => !takenIds.has(p.id)))
+      })
+      .catch(() => {})
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const body = mode === 'existing'
+        ? { participantId: selectedId }
+        : { newParticipantName: newName.trim() }
+      const res = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      onLinked()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const canSubmit = mode === 'existing' ? !!selectedId : !!newName.trim()
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-sm shadow-xl border border-transparent dark:border-gray-800">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="font-semibold text-gray-900 dark:text-white">Link participant</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{user.email}</p>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setMode('existing')}
+              className={`flex-1 py-1.5 text-sm rounded-lg border transition-colors ${mode === 'existing' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'}`}
+            >
+              Existing
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('new')}
+              className={`flex-1 py-1.5 text-sm rounded-lg border transition-colors ${mode === 'new' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'}`}
+            >
+              Create new
+            </button>
+          </div>
+
+          {mode === 'existing' ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Participant</label>
+              <select
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400"
+                required
+              >
+                <option value="">Select a participant…</option>
+                {participants.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              {participants.length === 0 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">No unlinked participants available.</p>
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Participant name</label>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400"
+                required
+              />
+            </div>
+          )}
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !canSubmit}
+              className="flex-1 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 text-sm font-medium"
+            >
+              {loading ? 'Saving…' : 'Link'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User[]; currentEmail: string }) {
   const [userList, setUserList] = useState(initialUsers)
   const [showCreate, setShowCreate] = useState(false)
   const [resetTarget, setResetTarget] = useState<User | null>(null)
+  const [linkTarget, setLinkTarget] = useState<User | null>(null)
 
   async function refresh() {
     const res = await fetch('/api/admin/users')
@@ -276,6 +409,14 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    {!u.participantId && (
+                      <button
+                        onClick={() => setLinkTarget(u)}
+                        className="text-sm text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 px-2 py-1 rounded hover:bg-green-50 dark:hover:bg-green-900/30"
+                      >
+                        Link participant
+                      </button>
+                    )}
                     <button
                       onClick={() => setResetTarget(u)}
                       className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -317,6 +458,15 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
         <ResetPasswordModal
           user={resetTarget}
           onClose={() => { setResetTarget(null); refresh() }}
+        />
+      )}
+
+      {linkTarget && (
+        <LinkParticipantModal
+          user={linkTarget}
+          takenIds={new Set(userList.map((u) => u.participantId).filter(Boolean) as string[])}
+          onClose={() => setLinkTarget(null)}
+          onLinked={() => { setLinkTarget(null); refresh() }}
         />
       )}
     </>
