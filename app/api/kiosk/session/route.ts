@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getOrCreateTodaySession, getSessionWithAttendance, autoAddFixedDayAttendances, getFixedDayParticipantIds } from '@/lib/queries/sessions'
+import { getOrCreateTodaySession, getSessionWithAttendance, getFixedDayParticipantIds } from '@/lib/queries/sessions'
 import { getActiveParticipants } from '@/lib/queries/participants'
 
 export async function GET() {
@@ -7,8 +7,6 @@ export async function GET() {
     getOrCreateTodaySession(),
     getActiveParticipants(),
   ])
-
-  await autoAddFixedDayAttendances(session.id, session.date)
 
   const [attending, fixedDayIds] = await Promise.all([
     getSessionWithAttendance(session.id),

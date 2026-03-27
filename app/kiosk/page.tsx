@@ -1,6 +1,6 @@
 import { DateHeader } from '@/components/kiosk/DateHeader'
 import { AvatarGrid } from '@/components/kiosk/AvatarGrid'
-import { getOrCreateTodaySession, getSessionWithAttendance, autoAddFixedDayAttendances, getFixedDayParticipantIds } from '@/lib/queries/sessions'
+import { getOrCreateTodaySession, getSessionWithAttendance, getFixedDayParticipantIds } from '@/lib/queries/sessions'
 import { getActiveParticipants } from '@/lib/queries/participants'
 
 export const dynamic = 'force-dynamic'
@@ -10,8 +10,6 @@ export default async function KioskPage() {
     getOrCreateTodaySession(),
     getActiveParticipants(),
   ])
-
-  await autoAddFixedDayAttendances(session.id, session.date)
 
   const [attending, fixedDayIds] = await Promise.all([
     getSessionWithAttendance(session.id),
