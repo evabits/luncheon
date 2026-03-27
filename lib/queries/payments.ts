@@ -49,6 +49,61 @@ export async function getMonthlyBilling(year: number, month: number) {
   }>
 }
 
+export async function getMonthlyBillingWithEmails(year: number, month: number) {
+  const rows = await db.execute(sql`
+    SELECT
+      p.id,
+      p.name,
+      p.email,
+      COUNT(a.id)::int AS lunch_count,
+      COALESCE(SUM(ls.cost::numeric), 0)::numeric AS total_cost,
+      COALESCE((
+        SELECT SUM(pay.amount::numeric)
+        FROM payments pay
+        WHERE pay.participant_id = p.id
+          AND pay.year = ${year}
+          AND pay.month = ${month}
+      ), 0)::numeric AS total_paid,
+      (
+        COALESCE(SUM(ls.cost::numeric), 0) -
+        COALESCE((
+          SELECT SUM(pay.amount::numeric)
+          FROM payments pay
+          WHERE pay.participant_id = p.id
+            AND pay.year = ${year}
+            AND pay.month = ${month}
+        ), 0)
+      )::numeric AS balance,
+      COALESCE(
+        json_agg(
+          json_build_object('date', ls.date::text, 'cost', ls.cost::text)
+          ORDER BY ls.date
+        ) FILTER (WHERE ls.id IS NOT NULL),
+        '[]'::json
+      ) AS sessions
+    FROM participants p
+    LEFT JOIN attendances a ON a.participant_id = p.id
+    LEFT JOIN lunch_sessions ls
+      ON ls.id = a.session_id
+      AND EXTRACT(YEAR FROM ls.date::date) = ${year}
+      AND EXTRACT(MONTH FROM ls.date::date) = ${month}
+    WHERE p.is_active = true
+    GROUP BY p.id, p.name, p.email
+    ORDER BY p.name
+  `)
+
+  return rows.rows as unknown as Array<{
+    id: string
+    name: string
+    email: string | null
+    lunch_count: number
+    total_cost: string
+    total_paid: string
+    balance: string
+    sessions: Array<{ date: string; cost: string }>
+  }>
+}
+
 export async function recordPayment(
   participantId: string,
   year: number,

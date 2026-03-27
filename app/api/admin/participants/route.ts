@@ -9,12 +9,12 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, avatarUrl, companyId } = await req.json()
+  const { name, avatarUrl, email, companyId } = await req.json()
   if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
 
   const [created] = await db
     .insert(participants)
-    .values({ name, avatarUrl: avatarUrl || null, companyId: companyId || null })
+    .values({ name, email: email || null, avatarUrl: avatarUrl || null, companyId: companyId || null })
     .returning()
 
   return NextResponse.json(created, { status: 201 })

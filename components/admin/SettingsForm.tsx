@@ -2,8 +2,14 @@
 
 import { useState } from 'react'
 
-export function SettingsForm({ initialCost }: { initialCost: number }) {
+interface SettingsFormProps {
+  initialCost: number
+  initialPaymentInstructions: string
+}
+
+export function SettingsForm({ initialCost, initialPaymentInstructions }: SettingsFormProps) {
   const [cost, setCost] = useState(String(initialCost))
+  const [paymentInstructions, setPaymentInstructions] = useState(initialPaymentInstructions)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -18,7 +24,7 @@ export function SettingsForm({ initialCost }: { initialCost: number }) {
       const res = await fetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ costPerLunch: Number(cost) }),
+        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null }),
       })
       if (!res.ok) throw new Error()
       setSaved(true)
@@ -45,6 +51,20 @@ export function SettingsForm({ initialCost }: { initialCost: number }) {
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           This cost will be applied to new lunch sessions. Existing sessions are not affected.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment instructions</label>
+        <textarea
+          value={paymentInstructions}
+          onChange={(e) => setPaymentInstructions(e.target.value)}
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 resize-y"
+          placeholder="e.g. Transfer to IBAN XX00 0000 0000 0000, reference: your name"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Shown at the bottom of monthly billing emails.
         </p>
       </div>
 

@@ -24,6 +24,7 @@ export async function getAllParticipants() {
     .select({
       id: participants.id,
       name: participants.name,
+      email: participants.email,
       avatarUrl: participants.avatarUrl,
       isActive: participants.isActive,
       companyId: participants.companyId,
