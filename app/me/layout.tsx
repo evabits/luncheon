@@ -18,7 +18,8 @@ export default async function MeLayout({ children }: { children: React.ReactNode
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/me">
-              <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-8 w-auto" />
+              <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-8 w-auto dark:hidden" />
+              <img src="/lunch-website-logo-dark.svg" alt="Luncheon" className="h-8 w-auto hidden dark:block" />
             </Link>
             <MeNav />
           </div>

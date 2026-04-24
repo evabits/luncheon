@@ -81,7 +81,8 @@ export function AdminNav() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-56 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col shrink-0">
         <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-10 w-auto" />
+          <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-10 w-auto dark:hidden" />
+          <img src="/lunch-website-logo-dark.svg" alt="Luncheon" className="h-10 w-auto hidden dark:block" />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 px-1">Admin</p>
         </div>
         {sidebarContent}
@@ -98,7 +99,8 @@ export function AdminNav() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-7 w-auto" />
+        <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-7 w-auto dark:hidden" />
+        <img src="/lunch-website-logo-dark.svg" alt="Luncheon" className="h-7 w-auto hidden dark:block" />
         <span className="text-xs text-gray-500 dark:text-gray-400">Admin</span>
       </div>
 
@@ -112,7 +114,8 @@ export function AdminNav() {
           <aside className="md:hidden fixed top-0 left-0 bottom-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
               <div>
-                <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-8 w-auto" />
+                <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-8 w-auto dark:hidden" />
+                <img src="/lunch-website-logo-dark.svg" alt="Luncheon" className="h-8 w-auto hidden dark:block" />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">Admin</p>
               </div>
               <button

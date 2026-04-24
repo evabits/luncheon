@@ -58,7 +58,8 @@ function LoginForm() {
     <main className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-8">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-20 mx-auto mb-2" />
+          <img src="/lunch-website-logo.svg" alt="Luncheon" className="h-20 mx-auto mb-2 dark:hidden" />
+          <img src="/lunch-website-logo-dark.svg" alt="Luncheon" className="h-20 mx-auto mb-2 hidden dark:block" />
           <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to your account</p>
         </div>
 
