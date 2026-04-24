@@ -34,25 +34,35 @@ export async function getSessionWithAttendance(sessionId: string) {
 }
 
 export async function getMonthlyReport(year: number, month: number) {
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = month === 12
+    ? `${year + 1}-01-01`
+    : `${year}-${String(month + 1).padStart(2, '0')}-01`
+
   const rows = await db.execute(sql`
     SELECT
       p.id,
       p.name,
       p.avatar_url,
-      COUNT(a.id)::int AS lunch_count,
-      COALESCE(SUM(ls.cost::numeric), 0)::numeric AS total_cost
+      COALESCE(sub.lunch_count, 0)::int AS lunch_count,
+      COALESCE(sub.total_cost, 0)::numeric AS total_cost
     FROM participants p
-    LEFT JOIN attendances a ON a.participant_id = p.id
-    LEFT JOIN lunch_sessions ls
-      ON ls.id = a.session_id
-      AND EXTRACT(YEAR FROM ls.date::date) = ${year}
-      AND EXTRACT(MONTH FROM ls.date::date) = ${month}
+    LEFT JOIN (
+      SELECT
+        a.participant_id,
+        COUNT(a.id)::int AS lunch_count,
+        SUM(ls.cost::numeric) AS total_cost
+      FROM attendances a
+      JOIN lunch_sessions ls ON ls.id = a.session_id
+        AND ls.date >= ${startDate}::date
+        AND ls.date < ${endDate}::date
+      GROUP BY a.participant_id
+    ) sub ON sub.participant_id = p.id
     WHERE p.is_active = true
-    GROUP BY p.id, p.name, p.avatar_url
     ORDER BY p.name
   `)
 
-  return rows.rows as unknown as Array<{
+return rows.rows as unknown as Array<{
     id: string
     name: string
     avatar_url: string | null
