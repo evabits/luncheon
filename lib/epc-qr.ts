@@ -22,3 +22,12 @@ export async function uploadQrImage(payload: string, filename: string): Promise<
   const blob = await put(`qr/${filename}`, buffer, { access: 'public', contentType: 'image/png' })
   return blob.url
 }
+
+export function buildPaytoUrl(iban: string, name: string, amount: number, remittance: string): string {
+  const params = new URLSearchParams({
+    'receiver-name': name,
+    amount: `EUR:${amount.toFixed(2)}`,
+    message: remittance,
+  })
+  return `payto://iban/${iban.replace(/\s/g, '')}?${params.toString()}`
+}

@@ -9,7 +9,7 @@ import { getMonthlyBillingWithEmails } from '../lib/queries/payments'
 import { getConfig } from '../lib/queries/config'
 import { sendEmail } from '../lib/mailer'
 import { buildBillEmail } from '../lib/email-template'
-import { buildEpcPayload, uploadQrImage } from '../lib/epc-qr'
+import { buildEpcPayload, uploadQrImage, buildPaytoUrl } from '../lib/epc-qr'
 
 function parseArgs(): { year: number; month: number } {
   const args = process.argv.slice(2)
@@ -69,9 +69,12 @@ async function main() {
     try {
       const balance = Number(row.balance)
       let qrImageUrl: string | null = null
+      let paytoUrl: string | null = null
       if (bankIban && bankAccountName && balance > 0) {
-        const payload = buildEpcPayload(bankIban, bankAccountName, balance, `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`)
+        const remittance = `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`
+        const payload = buildEpcPayload(bankIban, bankAccountName, balance, remittance)
         qrImageUrl = await uploadQrImage(payload, `bill-${year}-${month}-${row.id}.png`)
+        paytoUrl = buildPaytoUrl(bankIban, bankAccountName, balance, remittance)
       }
 
       const html = buildBillEmail({
@@ -84,6 +87,7 @@ async function main() {
         balance: row.balance,
         paymentInstructions,
         qrDataUri: qrImageUrl,
+        paytoUrl,
       })
 
       await sendEmail(
