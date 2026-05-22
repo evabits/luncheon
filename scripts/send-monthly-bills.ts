@@ -9,6 +9,7 @@ import { getMonthlyBillingWithEmails } from '../lib/queries/payments'
 import { getConfig } from '../lib/queries/config'
 import { sendEmail } from '../lib/mailer'
 import { buildBillEmail } from '../lib/email-template'
+import { buildEpcPayload, generateQrDataUri } from '../lib/epc-qr'
 
 function parseArgs(): { year: number; month: number } {
   const args = process.argv.slice(2)
@@ -45,6 +46,8 @@ async function main() {
   ])
 
   const paymentInstructions = cfg?.paymentInstructions ?? null
+  const bankIban = cfg?.bankIban ?? null
+  const bankAccountName = cfg?.bankAccountName ?? null
 
   let sent = 0
   let skipped = 0
@@ -64,6 +67,13 @@ async function main() {
     }
 
     try {
+      const balance = Number(row.balance)
+      let qrDataUri: string | null = null
+      if (bankIban && bankAccountName && balance > 0) {
+        const payload = buildEpcPayload(bankIban, bankAccountName, balance, `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`)
+        qrDataUri = await generateQrDataUri(payload)
+      }
+
       const html = buildBillEmail({
         name: row.name,
         year,
@@ -73,6 +83,7 @@ async function main() {
         totalPaid: row.total_paid,
         balance: row.balance,
         paymentInstructions,
+        qrDataUri,
       })
 
       await sendEmail(

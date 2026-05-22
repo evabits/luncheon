@@ -43,6 +43,13 @@
       "when": 1774620961530,
       "tag": "0005_premium_wendell_vaughn",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779453806929,
+      "tag": "0006_stale_colossus",
+      "breakpoints": true
     }
   ]
 }

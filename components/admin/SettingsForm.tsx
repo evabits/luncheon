@@ -5,11 +5,15 @@ import { useState } from 'react'
 interface SettingsFormProps {
   initialCost: number
   initialPaymentInstructions: string
+  initialBankAccountName: string
+  initialBankIban: string
 }
 
-export function SettingsForm({ initialCost, initialPaymentInstructions }: SettingsFormProps) {
+export function SettingsForm({ initialCost, initialPaymentInstructions, initialBankAccountName, initialBankIban }: SettingsFormProps) {
   const [cost, setCost] = useState(String(initialCost))
   const [paymentInstructions, setPaymentInstructions] = useState(initialPaymentInstructions)
+  const [bankAccountName, setBankAccountName] = useState(initialBankAccountName)
+  const [bankIban, setBankIban] = useState(initialBankIban)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -24,7 +28,7 @@ export function SettingsForm({ initialCost, initialPaymentInstructions }: Settin
       const res = await fetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null }),
+        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null, bankAccountName: bankAccountName || null, bankIban: bankIban || null }),
       })
       if (!res.ok) throw new Error()
       setSaved(true)
@@ -51,6 +55,31 @@ export function SettingsForm({ initialCost, initialPaymentInstructions }: Settin
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           This cost will be applied to new lunch sessions. Existing sessions are not affected.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Account holder name</label>
+        <input
+          type="text"
+          value={bankAccountName}
+          onChange={(e) => setBankAccountName(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+          placeholder="e.g. Evabits B.V."
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IBAN</label>
+        <input
+          type="text"
+          value={bankIban}
+          onChange={(e) => setBankIban(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 font-mono"
+          placeholder="e.g. NL91 ABNA 0417 1643 00"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Used to generate a payment QR code in billing emails.
         </p>
       </div>
 

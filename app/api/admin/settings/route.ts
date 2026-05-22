@@ -9,7 +9,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { costPerLunch, paymentInstructions } = await req.json()
+  const { costPerLunch, paymentInstructions, bankAccountName, bankIban } = await req.json()
 
   if (costPerLunch === undefined || isNaN(Number(costPerLunch))) {
     return NextResponse.json({ error: 'Invalid cost' }, { status: 400 })
@@ -20,6 +20,8 @@ export async function PATCH(req: NextRequest) {
   const values = {
     costPerLunch: String(costPerLunch),
     paymentInstructions: paymentInstructions ?? null,
+    bankAccountName: bankAccountName?.trim() || null,
+    bankIban: bankIban?.trim() || null,
     updatedAt: new Date(),
   }
 
