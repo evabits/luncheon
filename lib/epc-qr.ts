@@ -1,4 +1,5 @@
 import QRCode from 'qrcode'
+import { put } from '@vercel/blob'
 
 export function buildEpcPayload(iban: string, name: string, amount: number, remittance: string): string {
   return [
@@ -16,6 +17,8 @@ export function buildEpcPayload(iban: string, name: string, amount: number, remi
   ].join('\n')
 }
 
-export async function generateQrDataUri(payload: string): Promise<string> {
-  return QRCode.toDataURL(payload, { width: 200, margin: 1 })
+export async function uploadQrImage(payload: string, filename: string): Promise<string> {
+  const buffer = await QRCode.toBuffer(payload, { width: 200, margin: 1 })
+  const blob = await put(`qr/${filename}`, buffer, { access: 'public', contentType: 'image/png' })
+  return blob.url
 }

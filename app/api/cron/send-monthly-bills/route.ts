@@ -3,7 +3,7 @@ import { getMonthlyBillingWithEmails } from '@/lib/queries/payments'
 import { getConfig } from '@/lib/queries/config'
 import { sendEmail } from '@/lib/mailer'
 import { buildBillEmail } from '@/lib/email-template'
-import { buildEpcPayload, generateQrDataUri } from '@/lib/epc-qr'
+import { buildEpcPayload, uploadQrImage } from '@/lib/epc-qr'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,10 +50,10 @@ export async function GET(req: NextRequest) {
 
     try {
       const balance = Number(row.balance)
-      let qrDataUri: string | null = null
+      let qrImageUrl: string | null = null
       if (bankIban && bankAccountName && balance > 0) {
         const payload = buildEpcPayload(bankIban, bankAccountName, balance, `Lunch ${monthName} ${year} - ${row.name}`)
-        qrDataUri = await generateQrDataUri(payload)
+        qrImageUrl = await uploadQrImage(payload, `bill-${year}-${month}-${row.id}.png`)
       }
 
       const html = buildBillEmail({
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
         totalPaid: row.total_paid,
         balance: row.balance,
         paymentInstructions,
-        qrDataUri,
+        qrDataUri: qrImageUrl,
       })
       await sendEmail(row.email, subject, html)
       results.push({ name: row.name, status: 'sent' })
