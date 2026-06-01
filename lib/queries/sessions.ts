@@ -147,7 +147,12 @@ export async function getSkipLunchData(participantId: string) {
     const d = new Date(today)
     d.setDate(today.getDate() + i)
     if (fixedDows.has(d.getDay())) {
-      allFixedDates.push(d.toISOString().split('T')[0])
+      const dateStr = [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, '0'),
+        String(d.getDate()).padStart(2, '0'),
+      ].join('-')
+      allFixedDates.push(dateStr)
     }
   }
 
