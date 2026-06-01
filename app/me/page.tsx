@@ -46,7 +46,9 @@ export default async function MePage() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div>
+        <h3 className="font-medium text-gray-900 dark:text-white mb-3">Quick actions</h3>
+        <div className="flex flex-col sm:flex-row gap-3">
         <Link
           href="/me/history"
           className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -74,6 +76,7 @@ export default async function MePage() {
           </svg>
           Skip a day
         </Link>
+        </div>
       </div>
 
       {attended.length > 0 && (
