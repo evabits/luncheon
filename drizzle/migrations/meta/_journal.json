@@ -64,6 +64,13 @@
       "when": 1780310300453,
       "tag": "0008_sweet_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780313047045,
+      "tag": "0009_dry_veda",
+      "breakpoints": true
     }
   ]
 }

@@ -118,6 +118,17 @@ export const fixedDayOptOuts = pgTable(
   (t) => [unique().on(t.participantId, t.date)]
 )
 
+export const paymentLinks = pgTable('payment_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  mollieId: text('mollie_id').notNull().unique(),
+  participantId: uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  year: integer('year').notNull(),
+  month: integer('month').notNull(),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  paid: boolean('paid').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // Temporary setup codes for kiosk device activation (short-lived)
 export const kioskSetupCodes = pgTable('kiosk_setup_codes', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -10,6 +10,7 @@ import { getConfig } from '../lib/queries/config'
 import { sendEmail } from '../lib/mailer'
 import { buildBillEmail } from '../lib/email-template'
 import { createMolliePaymentLink } from '../lib/mollie'
+import { insertPaymentLink } from '../lib/queries/payment-links'
 
 function parseArgs(): { year: number; month: number } {
   const args = process.argv.slice(2)
@@ -69,7 +70,11 @@ async function main() {
       let paymentUrl: string | null = null
       if (process.env.MOLLIE_API_KEY && balance > 0) {
         const description = `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`
-        paymentUrl = await createMolliePaymentLink(balance, description)
+        const appUrl = process.env.APP_URL
+        const webhookUrl = appUrl ? `${appUrl}/api/webhooks/mollie` : undefined
+        const { url, id } = await createMolliePaymentLink(balance, description, webhookUrl)
+        paymentUrl = url
+        await insertPaymentLink(id, row.id, year, month, row.balance)
       }
 
       const html = buildBillEmail({

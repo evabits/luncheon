@@ -1,4 +1,8 @@
-export async function createMolliePaymentLink(amount: number, description: string): Promise<string> {
+export async function createMolliePaymentLink(
+  amount: number,
+  description: string,
+  webhookUrl?: string,
+): Promise<{ url: string; id: string }> {
   const apiKey = process.env.MOLLIE_API_KEY
   if (!apiKey) throw new Error('MOLLIE_API_KEY is not set')
 
@@ -10,10 +14,8 @@ export async function createMolliePaymentLink(amount: number, description: strin
     },
     body: JSON.stringify({
       description,
-      amount: {
-        currency: 'EUR',
-        value: amount.toFixed(2),
-      },
+      amount: { currency: 'EUR', value: amount.toFixed(2) },
+      ...(webhookUrl ? { webhookUrl } : {}),
     }),
   })
 
@@ -23,5 +25,21 @@ export async function createMolliePaymentLink(amount: number, description: strin
   }
 
   const data = await res.json()
-  return data._links.paymentLink.href as string
+  return { url: data._links.paymentLink.href as string, id: data.id as string }
+}
+
+export async function fetchMolliePayment(paymentId: string) {
+  const apiKey = process.env.MOLLIE_API_KEY
+  if (!apiKey) throw new Error('MOLLIE_API_KEY is not set')
+
+  const res = await fetch(`https://api.mollie.com/v2/payments/${paymentId}`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+
+  if (!res.ok) return null
+  return res.json() as Promise<{
+    status: string
+    amount: { value: string; currency: string }
+    _links: { paymentLink?: { href: string } }
+  }>
 }
