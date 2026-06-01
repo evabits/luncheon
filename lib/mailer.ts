@@ -1,14 +1,17 @@
-const API_URL = 'https://send.api.mailtrap.io/api/send'
-
 export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   const token = process.env.MAILER_API_TOKEN
   const fromEmail = process.env.MAILER_FROM_EMAIL
   const fromName = process.env.MAILER_FROM_NAME ?? 'Luncheon'
+  const inboxId = process.env.MAILER_SANDBOX_INBOX_ID
 
   if (!token) throw new Error('MAILER_API_TOKEN is not set')
   if (!fromEmail) throw new Error('MAILER_FROM_EMAIL is not set')
 
-  const res = await fetch(API_URL, {
+  const apiUrl = inboxId
+    ? `https://sandbox.api.mailtrap.io/api/send/${inboxId}`
+    : 'https://send.api.mailtrap.io/api/send'
+
+  const res = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

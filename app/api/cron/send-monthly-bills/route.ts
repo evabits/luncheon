@@ -51,12 +51,16 @@ export async function GET(req: NextRequest) {
       const balance = Number(row.balance)
       let paymentUrl: string | null = null
       if (process.env.MOLLIE_API_KEY && balance > 0) {
-        const description = `Lunch ${monthName} ${year} - ${row.name}`
-        const host = req.headers.get('host') ?? ''
-        const webhookUrl = `https://${host}/api/webhooks/mollie`
-        const { url, id } = await createMolliePaymentLink(balance, description, webhookUrl)
-        paymentUrl = url
-        await insertPaymentLink(id, row.id, year, month, row.balance)
+        try {
+          const description = `Lunch ${monthName} ${year} - ${row.name}`
+          const host = req.headers.get('host') ?? ''
+          const webhookUrl = `https://${host}/api/webhooks/mollie`
+          const { url, id } = await createMolliePaymentLink(balance, description, webhookUrl)
+          paymentUrl = url
+          await insertPaymentLink(id, row.id, year, month, row.balance)
+        } catch (mollieErr) {
+          console.error(`[send-monthly-bills] Mollie payment link failed for ${row.name}:`, mollieErr instanceof Error ? mollieErr.message : String(mollieErr))
+        }
       }
 
       const html = buildBillEmail({
