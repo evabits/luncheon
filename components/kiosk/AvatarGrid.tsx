@@ -9,6 +9,8 @@ interface Participant {
   avatarUrl: string | null
   attending: boolean
   fixedDay?: boolean
+  companyId: string | null
+  companyName: string | null
 }
 
 interface Session {
@@ -26,6 +28,7 @@ export function AvatarGrid({ initialSession, initialParticipants }: Props) {
   const [participants, setParticipants] = useState(initialParticipants)
   const [session, setSession] = useState(initialSession)
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set())
+  const [activeTab, setActiveTab] = useState<string | null>(null) // null = All
 
   const refresh = useCallback(async () => {
     try {
@@ -37,7 +40,6 @@ export function AvatarGrid({ initialSession, initialParticipants }: Props) {
     } catch {}
   }, [])
 
-  // Poll every 30 seconds to stay in sync with other devices
   useEffect(() => {
     const interval = setInterval(refresh, 30_000)
     return () => clearInterval(interval)
@@ -45,8 +47,6 @@ export function AvatarGrid({ initialSession, initialParticipants }: Props) {
 
   async function toggleAttendance(participantId: string) {
     setLoadingIds((prev) => new Set(prev).add(participantId))
-
-    // Optimistic update
     setParticipants((prev) =>
       prev.map((p) => (p.id === participantId ? { ...p, attending: !p.attending } : p))
     )
@@ -63,7 +63,6 @@ export function AvatarGrid({ initialSession, initialParticipants }: Props) {
         prev.map((p) => (p.id === participantId ? { ...p, attending } : p))
       )
     } catch {
-      // Revert on failure
       setParticipants((prev) =>
         prev.map((p) => (p.id === participantId ? { ...p, attending: !p.attending } : p))
       )
@@ -76,7 +75,40 @@ export function AvatarGrid({ initialSession, initialParticipants }: Props) {
     }
   }
 
+  // Derive sorted unique companies
+  const companies = Array.from(
+    new Map(
+      participants
+        .filter((p) => p.companyId)
+        .map((p) => [p.companyId!, p.companyName ?? p.companyId!])
+    ).entries()
+  ).sort((a, b) => a[1].localeCompare(b[1]))
+
+  const showTabs = companies.length > 0
+
   const attending = participants.filter((p) => p.attending)
+
+  // Participants to show based on active tab
+  const visible =
+    activeTab === null
+      ? participants
+      : participants.filter((p) => p.companyId === activeTab)
+
+  // Groups for the grid: in "All" mode, group by company; in company tab, flat list
+  const groups: { label: string | null; items: Participant[] }[] =
+    activeTab !== null
+      ? [{ label: null, items: visible }]
+      : companies.length > 0
+      ? [
+          ...companies.map(([id, name]) => ({
+            label: name,
+            items: participants.filter((p) => p.companyId === id),
+          })),
+          ...(participants.some((p) => !p.companyId)
+            ? [{ label: 'Other', items: participants.filter((p) => !p.companyId) }]
+            : []),
+        ]
+      : [{ label: null, items: visible }]
 
   return (
     <div className="flex flex-col gap-6">
@@ -85,14 +117,53 @@ export function AvatarGrid({ initialSession, initialParticipants }: Props) {
         <span>€{Number(session.cost).toFixed(2)} per person</span>
       </div>
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
-        {participants.map((p) => (
-          <ParticipantCard
-            key={p.id}
-            {...p}
-            loading={loadingIds.has(p.id)}
-            onToggle={toggleAttendance}
-          />
+      {showTabs && (
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveTab(null)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              activeTab === null
+                ? 'bg-white text-gray-950'
+                : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+            }`}
+          >
+            All
+          </button>
+          {companies.map(([id, name]) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === id
+                  ? 'bg-white text-gray-950'
+                  : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-8">
+        {groups.map((group, i) => (
+          <div key={i}>
+            {group.label && (
+              <div className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">
+                {group.label}
+              </div>
+            )}
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+              {group.items.map((p) => (
+                <ParticipantCard
+                  key={p.id}
+                  {...p}
+                  loading={loadingIds.has(p.id)}
+                  onToggle={toggleAttendance}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>

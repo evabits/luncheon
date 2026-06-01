@@ -19,6 +19,8 @@ export async function GET() {
     avatarUrl: p.avatarUrl,
     attending: attending.has(p.id),
     fixedDay: fixedDayIds.has(p.id),
+    companyId: p.companyId ?? null,
+    companyName: p.companyName ?? null,
   }))
 
   return NextResponse.json({ session, participants: participantsWithStatus })

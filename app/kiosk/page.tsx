@@ -22,6 +22,8 @@ export default async function KioskPage() {
     avatarUrl: p.avatarUrl,
     attending: attending.has(p.id),
     fixedDay: fixedDayIds.has(p.id),
+    companyId: p.companyId ?? null,
+    companyName: p.companyName ?? null,
   }))
 
   return (
