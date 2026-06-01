@@ -73,7 +73,9 @@ export async function GET(req: NextRequest) {
       await sendEmail(row.email, subject, html)
       results.push({ name: row.name, status: 'sent' })
     } catch (err) {
-      results.push({ name: row.name, status: 'failed', reason: err instanceof Error ? err.message : String(err) })
+      const reason = err instanceof Error ? err.message : String(err)
+      console.error(`[send-monthly-bills] failed for ${row.name}:`, reason)
+      results.push({ name: row.name, status: 'failed', reason })
     }
   }
 
