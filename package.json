@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "bun scripts/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "seed": "bun scripts/seed.ts"
   },

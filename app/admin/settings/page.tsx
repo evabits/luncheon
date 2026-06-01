@@ -16,8 +16,6 @@ export default async function SettingsPage() {
           <SettingsForm
             initialCost={cfg ? Number(cfg.costPerLunch) : 85}
             initialPaymentInstructions={cfg?.paymentInstructions ?? ''}
-            initialBankAccountName={cfg?.bankAccountName ?? ''}
-            initialBankIban={cfg?.bankIban ?? ''}
           />
         </div>
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">

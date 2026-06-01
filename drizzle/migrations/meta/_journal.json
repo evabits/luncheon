@@ -50,6 +50,13 @@
       "when": 1779453806929,
       "tag": "0006_stale_colossus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780308847278,
+      "tag": "0007_nifty_goblin_queen",
+      "breakpoints": true
     }
   ]
 }

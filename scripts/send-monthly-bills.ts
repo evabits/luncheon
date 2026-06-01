@@ -9,7 +9,7 @@ import { getMonthlyBillingWithEmails } from '../lib/queries/payments'
 import { getConfig } from '../lib/queries/config'
 import { sendEmail } from '../lib/mailer'
 import { buildBillEmail } from '../lib/email-template'
-import { buildEpcPayload, uploadQrImage, buildPaytoUrl } from '../lib/epc-qr'
+import { createMolliePaymentLink } from '../lib/mollie'
 
 function parseArgs(): { year: number; month: number } {
   const args = process.argv.slice(2)
@@ -46,8 +46,6 @@ async function main() {
   ])
 
   const paymentInstructions = cfg?.paymentInstructions ?? null
-  const bankIban = cfg?.bankIban ?? null
-  const bankAccountName = cfg?.bankAccountName ?? null
 
   let sent = 0
   let skipped = 0
@@ -68,13 +66,10 @@ async function main() {
 
     try {
       const balance = Number(row.balance)
-      let qrImageUrl: string | null = null
-      let paytoUrl: string | null = null
-      if (bankIban && bankAccountName && balance > 0) {
-        const remittance = `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`
-        const payload = buildEpcPayload(bankIban, bankAccountName, balance, remittance)
-        qrImageUrl = await uploadQrImage(payload, `bill-${year}-${month}-${row.id}.png`)
-        paytoUrl = buildPaytoUrl(bankIban, bankAccountName, balance, remittance)
+      let paymentUrl: string | null = null
+      if (process.env.MOLLIE_API_KEY && balance > 0) {
+        const description = `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`
+        paymentUrl = await createMolliePaymentLink(balance, description)
       }
 
       const html = buildBillEmail({
@@ -86,8 +81,7 @@ async function main() {
         totalPaid: row.total_paid,
         balance: row.balance,
         paymentInstructions,
-        qrDataUri: qrImageUrl,
-        paytoUrl,
+        paymentUrl,
       })
 
       await sendEmail(

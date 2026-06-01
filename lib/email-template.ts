@@ -12,12 +12,11 @@ interface BillTemplateOptions {
   totalPaid: string
   balance: string
   paymentInstructions: string | null
-  qrDataUri?: string | null
-  paytoUrl?: string | null
+  paymentUrl?: string | null
 }
 
 export function buildBillEmail(opts: BillTemplateOptions): string {
-  const { name, year, month, sessions, totalCost, totalPaid, balance, paymentInstructions, qrDataUri, paytoUrl } = opts
+  const { name, year, month, sessions, totalCost, totalPaid, balance, paymentInstructions, paymentUrl } = opts
   const monthName = MONTH_NAMES[month - 1]
 
   const rows = sessions
@@ -30,27 +29,16 @@ export function buildBillEmail(opts: BillTemplateOptions): string {
     )
     .join('')
 
-  const paytoButton = paytoUrl
-    ? `<a href="${paytoUrl}" style="display:inline-block;margin-top:12px;padding:10px 24px;background:#111827;color:#ffffff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;">Pay now</a>`
+  const payButton = paymentUrl
+    ? `<div style="text-align:center;margin-top:16px;"><a href="${paymentUrl}" style="display:inline-block;padding:10px 24px;background:#111827;color:#ffffff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;">Pay now</a></div>`
     : ''
 
-  const qrBlock = qrDataUri
-    ? `
-    <div style="text-align:center;margin-top:16px;">
-      <img src="${qrDataUri}" width="160" height="160" alt="Scan to pay" style="display:block;margin:0 auto;" />
-      <p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Scan with your banking app to pay</p>
-      ${paytoButton}
-    </div>`
-    : paytoButton
-      ? `<div style="text-align:center;margin-top:16px;">${paytoButton}</div>`
-      : ''
-
-  const paymentBlock = paymentInstructions || qrDataUri
+  const paymentBlock = paymentInstructions || paymentUrl
     ? `
     <div style="margin-top:24px;padding:16px;background:#f9f9f9;border-radius:8px;">
       ${paymentInstructions ? `<p style="margin:0 0 8px;font-weight:600;color:#374151;">Payment instructions</p>
       <p style="margin:0;white-space:pre-line;color:#4b5563;">${paymentInstructions}</p>` : ''}
-      ${qrBlock}
+      ${payButton}
     </div>`
     : ''
 

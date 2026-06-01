@@ -5,15 +5,11 @@ import { useState } from 'react'
 interface SettingsFormProps {
   initialCost: number
   initialPaymentInstructions: string
-  initialBankAccountName: string
-  initialBankIban: string
 }
 
-export function SettingsForm({ initialCost, initialPaymentInstructions, initialBankAccountName, initialBankIban }: SettingsFormProps) {
+export function SettingsForm({ initialCost, initialPaymentInstructions }: SettingsFormProps) {
   const [cost, setCost] = useState(String(initialCost))
   const [paymentInstructions, setPaymentInstructions] = useState(initialPaymentInstructions)
-  const [bankAccountName, setBankAccountName] = useState(initialBankAccountName)
-  const [bankIban, setBankIban] = useState(initialBankIban)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -28,7 +24,7 @@ export function SettingsForm({ initialCost, initialPaymentInstructions, initialB
       const res = await fetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null, bankAccountName: bankAccountName || null, bankIban: bankIban || null }),
+        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null }),
       })
       if (!res.ok) throw new Error()
       setSaved(true)
@@ -59,38 +55,13 @@ export function SettingsForm({ initialCost, initialPaymentInstructions, initialB
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Account holder name</label>
-        <input
-          type="text"
-          value={bankAccountName}
-          onChange={(e) => setBankAccountName(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
-          placeholder="e.g. Evabits B.V."
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IBAN</label>
-        <input
-          type="text"
-          value={bankIban}
-          onChange={(e) => setBankIban(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 font-mono"
-          placeholder="e.g. NL91 ABNA 0417 1643 00"
-        />
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Used to generate a payment QR code in billing emails.
-        </p>
-      </div>
-
-      <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment instructions</label>
         <textarea
           value={paymentInstructions}
           onChange={(e) => setPaymentInstructions(e.target.value)}
           rows={4}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 resize-y"
-          placeholder="e.g. Transfer to IBAN XX00 0000 0000 0000, reference: your name"
+          placeholder="Optional text shown at the bottom of monthly billing emails"
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Shown at the bottom of monthly billing emails.

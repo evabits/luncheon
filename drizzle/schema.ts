@@ -75,8 +75,6 @@ export const config = pgTable('config', {
   id: uuid('id').primaryKey().defaultRandom(),
   costPerLunch: numeric('cost_per_lunch', { precision: 10, scale: 2 }).notNull().default('85.00'),
   paymentInstructions: text('payment_instructions'),
-  bankAccountName: text('bank_account_name'),
-  bankIban: text('bank_iban'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

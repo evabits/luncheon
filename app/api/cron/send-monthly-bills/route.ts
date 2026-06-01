@@ -3,7 +3,7 @@ import { getMonthlyBillingWithEmails } from '@/lib/queries/payments'
 import { getConfig } from '@/lib/queries/config'
 import { sendEmail } from '@/lib/mailer'
 import { buildBillEmail } from '@/lib/email-template'
-import { buildEpcPayload, uploadQrImage, buildPaytoUrl } from '@/lib/epc-qr'
+import { createMolliePaymentLink } from '@/lib/mollie'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,8 +31,6 @@ export async function GET(req: NextRequest) {
   ])
 
   const paymentInstructions = cfg?.paymentInstructions ?? null
-  const bankIban = cfg?.bankIban ?? null
-  const bankAccountName = cfg?.bankAccountName ?? null
   const monthName = MONTH_NAMES[month - 1]
   const subject = `Lunch bill — ${monthName} ${year}`
 
@@ -50,13 +48,10 @@ export async function GET(req: NextRequest) {
 
     try {
       const balance = Number(row.balance)
-      let qrImageUrl: string | null = null
-      let paytoUrl: string | null = null
-      if (bankIban && bankAccountName && balance > 0) {
-        const remittance = `Lunch ${monthName} ${year} - ${row.name}`
-        const payload = buildEpcPayload(bankIban, bankAccountName, balance, remittance)
-        qrImageUrl = await uploadQrImage(payload, `bill-${year}-${month}-${row.id}.png`)
-        paytoUrl = buildPaytoUrl(bankIban, bankAccountName, balance, remittance)
+      let paymentUrl: string | null = null
+      if (process.env.MOLLIE_API_KEY && balance > 0) {
+        const description = `Lunch ${monthName} ${year} - ${row.name}`
+        paymentUrl = await createMolliePaymentLink(balance, description)
       }
 
       const html = buildBillEmail({
@@ -68,8 +63,7 @@ export async function GET(req: NextRequest) {
         totalPaid: row.total_paid,
         balance: row.balance,
         paymentInstructions,
-        qrDataUri: qrImageUrl,
-        paytoUrl,
+        paymentUrl,
       })
       await sendEmail(row.email, subject, html)
       results.push({ name: row.name, status: 'sent' })
