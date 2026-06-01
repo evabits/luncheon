@@ -127,6 +127,12 @@ function LoginForm() {
             Sign in with Google
           </button>
         </div>
+
+        <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
+          <a href="/privacy" className="hover:underline">Privacy Policy</a>
+          {' · '}
+          <a href="/terms" className="hover:underline">Terms of Service</a>
+        </p>
       </div>
     </main>
   )
