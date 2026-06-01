@@ -1,6 +1,6 @@
 import { db } from '../db'
-import { lunchSessions, attendances, participants, config, participantFixedDays } from '@/drizzle/schema'
-import { eq, and, sql } from 'drizzle-orm'
+import { lunchSessions, attendances, participants, config, participantFixedDays, fixedDayOptOuts } from '@/drizzle/schema'
+import { eq, and, sql, inArray } from 'drizzle-orm'
 
 export async function getOrCreateTodaySession() {
   const today = new Date().toISOString().split('T')[0]
@@ -97,16 +97,25 @@ export async function getParticipantHistory(participantId: string) {
 export async function autoAddFixedDayAttendances(sessionId: string, date: string) {
   const dow = new Date(date + 'T12:00:00').getDay()
 
-  const fixed = await db
-    .select({ participantId: participantFixedDays.participantId })
-    .from(participantFixedDays)
-    .innerJoin(participants, eq(participantFixedDays.participantId, participants.id))
-    .where(and(
-      eq(participantFixedDays.dayOfWeek, dow),
-      eq(participants.isActive, true),
-    ))
+  const [fixed, optOuts] = await Promise.all([
+    db
+      .select({ participantId: participantFixedDays.participantId })
+      .from(participantFixedDays)
+      .innerJoin(participants, eq(participantFixedDays.participantId, participants.id))
+      .where(and(
+        eq(participantFixedDays.dayOfWeek, dow),
+        eq(participants.isActive, true),
+      )),
+    db
+      .select({ participantId: fixedDayOptOuts.participantId })
+      .from(fixedDayOptOuts)
+      .where(eq(fixedDayOptOuts.date, date)),
+  ])
+
+  const optOutIds = new Set(optOuts.map(r => r.participantId))
 
   for (const { participantId } of fixed) {
+    if (optOutIds.has(participantId)) continue
     await db.insert(attendances)
       .values({ sessionId, participantId })
       .onConflictDoNothing()
@@ -120,6 +129,46 @@ export async function getFixedDayParticipantIds(date: string): Promise<Set<strin
     .from(participantFixedDays)
     .where(eq(participantFixedDays.dayOfWeek, dow))
   return new Set(rows.map(r => r.participantId))
+}
+
+export async function getSkipLunchData(participantId: string) {
+  const fixedRows = await db
+    .select({ dayOfWeek: participantFixedDays.dayOfWeek })
+    .from(participantFixedDays)
+    .where(eq(participantFixedDays.participantId, participantId))
+
+  const fixedDows = new Set(fixedRows.map(r => r.dayOfWeek))
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const allFixedDates: string[] = []
+  for (let i = 1; i <= 28; i++) {
+    const d = new Date(today)
+    d.setDate(today.getDate() + i)
+    if (fixedDows.has(d.getDay())) {
+      allFixedDates.push(d.toISOString().split('T')[0])
+    }
+  }
+
+  if (allFixedDates.length === 0) {
+    return { upcoming: [] as string[], scheduled: [] as string[] }
+  }
+
+  const optOuts = await db
+    .select({ date: fixedDayOptOuts.date })
+    .from(fixedDayOptOuts)
+    .where(and(
+      eq(fixedDayOptOuts.participantId, participantId),
+      inArray(fixedDayOptOuts.date, allFixedDates),
+    ))
+
+  const optOutDates = new Set(optOuts.map(r => r.date))
+
+  return {
+    upcoming: allFixedDates.filter(d => !optOutDates.has(d)),
+    scheduled: allFixedDates.filter(d => optOutDates.has(d)),
+  }
 }
 
 export async function getMissedSessions(participantId: string, limitDays = 30) {

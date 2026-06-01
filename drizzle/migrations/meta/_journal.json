@@ -57,6 +57,13 @@
       "when": 1780308847278,
       "tag": "0007_nifty_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780310300453,
+      "tag": "0008_sweet_paper_doll",
+      "breakpoints": true
     }
   ]
 }

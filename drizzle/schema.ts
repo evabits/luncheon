@@ -106,6 +106,18 @@ export const payments = pgTable('payments', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+export const fixedDayOptOuts = pgTable(
+  'fixed_day_opt_outs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    participantId: uuid('participant_id')
+      .notNull()
+      .references(() => participants.id, { onDelete: 'cascade' }),
+    date: text('date').notNull(), // YYYY-MM-DD
+  },
+  (t) => [unique().on(t.participantId, t.date)]
+)
+
 // Temporary setup codes for kiosk device activation (short-lived)
 export const kioskSetupCodes = pgTable('kiosk_setup_codes', {
   id: uuid('id').primaryKey().defaultRandom(),
