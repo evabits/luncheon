@@ -1,69 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const links = [
-  {
-    href: '/me',
-    label: 'Dashboard',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
-  },
-  {
-    href: '/me/history',
-    label: 'History',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/me/add-lunch',
-    label: 'Add Lunch',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
-    ),
-  },
-  {
-    href: '/me/schedule',
-    label: 'Schedule',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/me/skip-lunch',
-    label: 'Skip a Day',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-      </svg>
-    ),
-  },
-  {
-    href: '/me/billing',
-    label: 'Billing',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-      </svg>
-    ),
-  },
+const lunchLinks = [
+  { href: '/me/history', label: 'History' },
+  { href: '/me/add-lunch', label: 'Add Lunch' },
+  { href: '/me/skip-lunch', label: 'Skip a Day' },
+  { href: '/me/schedule', label: 'Schedule' },
 ]
 
 export function MeNav() {
-  const [open, setOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [lunchOpen, setLunchOpen] = useState(false)
   const pathname = usePathname()
+  const lunchRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (lunchRef.current && !lunchRef.current.contains(e.target as Node)) {
+        setLunchOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
 
   const linkClass = (href: string) =>
     `transition-colors text-sm flex items-center gap-1.5 ${
@@ -72,25 +34,69 @@ export function MeNav() {
         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
     }`
 
+  const lunchActive = lunchLinks.some((l) => pathname === l.href)
+
   return (
     <>
       {/* Desktop */}
-      <nav className="hidden md:flex gap-4">
-        {links.map(({ href, label, icon }) => (
-          <Link key={href} href={href} className={linkClass(href)}>
-            {icon}{label}
-          </Link>
-        ))}
+      <nav className="hidden md:flex gap-4 items-center">
+        <Link href="/me" className={linkClass('/me')}>
+          Dashboard
+        </Link>
+
+        <div ref={lunchRef} className="relative">
+          <button
+            onClick={() => setLunchOpen((v) => !v)}
+            className={`transition-colors text-sm flex items-center gap-1 ${
+              lunchActive
+                ? 'text-gray-900 dark:text-white font-medium'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Lunch
+            <svg
+              className={`w-3.5 h-3.5 transition-transform ${lunchOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {lunchOpen && (
+            <div className="absolute left-0 top-full mt-1 w-36 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1">
+              {lunchLinks.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setLunchOpen(false)}
+                  className={`flex items-center px-4 py-2 text-sm transition-colors ${
+                    pathname === href
+                      ? 'text-gray-900 dark:text-white font-medium bg-gray-50 dark:bg-gray-800'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Link href="/me/billing" className={linkClass('/me/billing')}>
+          Billing
+        </Link>
       </nav>
 
       {/* Mobile hamburger */}
       <div className="md:hidden relative">
         <button
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setMobileOpen((v) => !v)}
           aria-label="Toggle menu"
           className="p-2 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
-          {open ? (
+          {mobileOpen ? (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -101,20 +107,20 @@ export function MeNav() {
           )}
         </button>
 
-        {open && (
-          <div className="absolute left-0 top-full mt-1 w-44 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1">
-            {links.map(({ href, label, icon }) => (
+        {mobileOpen && (
+          <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1">
+            {[{ href: '/me', label: 'Dashboard' }].concat(lunchLinks).concat([{ href: '/me/billing', label: 'Billing' }]).map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                onClick={() => setOpen(false)}
+                onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
                   pathname === href
                     ? 'text-gray-900 dark:text-white font-medium bg-gray-50 dark:bg-gray-800'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
-                {icon}{label}
+                {label}
               </Link>
             ))}
           </div>
