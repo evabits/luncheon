@@ -21,6 +21,7 @@ export async function createMolliePaymentLink(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
+    console.error('Mollie API error', res.status, JSON.stringify(err))
     throw new Error(`Mollie error ${res.status}: ${err.detail ?? res.statusText}`)
   }
 
