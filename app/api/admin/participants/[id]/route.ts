@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { participants, users, participantFixedDays } from '@/drizzle/schema'
+import { participants, users, participantFixedDays, startingBalanceChanges } from '@/drizzle/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json()
-  const { name, avatarUrl, email, isActive, fixedDays, companyId } = body
+  const { name, avatarUrl, email, isActive, fixedDays, companyId, startingBalance } = body
 
   const updateData: Record<string, unknown> = {}
   if (name !== undefined) updateData.name = name
@@ -16,6 +16,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (isActive !== undefined) updateData.isActive = isActive
   if (companyId !== undefined) updateData.companyId = companyId
 
+  let oldStartingBalance: string | undefined
+  if (startingBalance !== undefined) {
+    const [current] = await db.select({ startingBalance: participants.startingBalance }).from(participants).where(eq(participants.id, id)).limit(1)
+    oldStartingBalance = current?.startingBalance ?? '0'
+    const newVal = Number(startingBalance).toFixed(2)
+    updateData.startingBalance = newVal
+  }
+
   const [updated] = await db
     .update(participants)
     .set(updateData)
@@ -23,6 +31,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .returning()
 
   if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  if (startingBalance !== undefined && oldStartingBalance !== undefined) {
+    const newVal = Number(startingBalance).toFixed(2)
+    const oldVal = Number(oldStartingBalance).toFixed(2)
+    if (newVal !== oldVal) {
+      await db.insert(startingBalanceChanges).values({
+        participantId: id,
+        oldAmount: oldVal,
+        newAmount: newVal,
+      })
+    }
+  }
 
   if (Array.isArray(fixedDays)) {
     await db.delete(participantFixedDays).where(eq(participantFixedDays.participantId, id))

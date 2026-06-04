@@ -66,16 +66,16 @@ async function main() {
     }
 
     try {
-      const balance = Number(row.balance)
+      const totalOwed = Number(row.cumulative_balance)
       let paymentUrl: string | null = null
-      if (process.env.MOLLIE_API_KEY && balance > 0) {
+      if (process.env.MOLLIE_API_KEY && totalOwed > 0) {
         try {
           const description = `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`
           const appUrl = process.env.APP_URL
           const webhookUrl = appUrl ? `${appUrl}/api/webhooks/mollie` : undefined
-          const { url, id } = await createMolliePaymentLink(balance, description, webhookUrl)
+          const { url, id } = await createMolliePaymentLink(totalOwed, description, webhookUrl)
           paymentUrl = url
-          await insertPaymentLink(id, row.id, year, month, row.balance)
+          await insertPaymentLink(id, row.id, year, month, row.cumulative_balance)
         } catch (mollieErr) {
           console.error(`[send-monthly-bills] Mollie payment link failed for ${row.name}:`, mollieErr instanceof Error ? mollieErr.message : String(mollieErr))
         }

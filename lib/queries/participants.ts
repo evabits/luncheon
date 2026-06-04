@@ -29,6 +29,7 @@ export async function getAllParticipants() {
       isActive: participants.isActive,
       companyId: participants.companyId,
       companyName: companies.name,
+      startingBalance: participants.startingBalance,
       createdAt: participants.createdAt,
     })
     .from(participants)

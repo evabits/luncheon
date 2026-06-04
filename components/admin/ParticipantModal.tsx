@@ -26,6 +26,7 @@ interface Participant {
   avatarUrl: string | null
   isActive: boolean
   companyId?: string | null
+  startingBalance?: string | null
 }
 
 interface Props {
@@ -44,6 +45,9 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
   const [fixedDays, setFixedDays] = useState<Set<number>>(new Set())
   const [companies, setCompanies] = useState<Company[]>([])
   const [companyId, setCompanyId] = useState<string>(participant?.companyId ?? '')
+  const [startingBalance, setStartingBalance] = useState(
+    participant?.startingBalance ? Number(participant.startingBalance).toFixed(2) : '0.00'
+  )
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -96,7 +100,7 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email: email.trim() || null, avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays), companyId: companyId || null }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim() || null, avatarUrl: avatarUrl || null, fixedDays: Array.from(fixedDays), companyId: companyId || null, startingBalance: participant ? (Number(startingBalance) || 0).toFixed(2) : undefined }),
       })
 
       if (!res.ok) throw new Error()
@@ -168,6 +172,21 @@ export function ParticipantModal({ participant, onClose, onSaved }: Props) {
               placeholder="name@example.com"
             />
           </div>
+
+          {participant && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starting balance (€)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={startingBalance}
+                onChange={(e) => setStartingBalance(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+                placeholder="0.00"
+              />
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Historical debt before the app started tracking. Positive = owes money.</p>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fixed days</label>

@@ -1,7 +1,7 @@
 import { db } from '@/lib/db'
 import { attendanceRemovals, participants, lunchSessions } from '@/drizzle/schema'
 import { eq, desc } from 'drizzle-orm'
-import { getRecentPayments } from '@/lib/queries/payments'
+import { getRecentPayments, getRecentStartingBalanceChanges } from '@/lib/queries/payments'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +11,7 @@ const MONTHS = [
 ]
 
 export default async function ActivityLogPage() {
-  const [removals, recentPayments] = await Promise.all([
+  const [removals, recentPayments, balanceChanges] = await Promise.all([
     db
       .select({
         id: attendanceRemovals.id,
@@ -26,6 +26,7 @@ export default async function ActivityLogPage() {
       .orderBy(desc(attendanceRemovals.removedAt))
       .limit(200),
     getRecentPayments(200),
+    getRecentStartingBalanceChanges(200),
   ])
 
   type RemovalEvent = {
@@ -46,7 +47,15 @@ export default async function ActivityLogPage() {
     amount: string
     note: string | null
   }
-  type Event = RemovalEvent | PaymentEvent
+  type BalanceChangeEvent = {
+    kind: 'balance_change'
+    id: string
+    timestamp: Date
+    participantName: string
+    oldAmount: string
+    newAmount: string
+  }
+  type Event = RemovalEvent | PaymentEvent | BalanceChangeEvent
 
   const removalEvents: RemovalEvent[] = removals.map((r) => ({
     kind: 'removal',
@@ -68,7 +77,16 @@ export default async function ActivityLogPage() {
     note: p.note,
   }))
 
-  const events: Event[] = [...removalEvents, ...paymentEvents]
+  const balanceChangeEvents: BalanceChangeEvent[] = balanceChanges.map((b) => ({
+    kind: 'balance_change',
+    id: b.id,
+    timestamp: new Date(b.changedAt),
+    participantName: b.participantName,
+    oldAmount: b.oldAmount,
+    newAmount: b.newAmount,
+  }))
+
+  const events: Event[] = [...removalEvents, ...paymentEvents, ...balanceChangeEvents]
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 200)
 
@@ -112,6 +130,8 @@ export default async function ActivityLogPage() {
                         month: 'short',
                         day: 'numeric',
                       })
+                    ) : event.kind === 'balance_change' ? (
+                      `Starting balance: €${Number(event.oldAmount).toFixed(2)} → €${Number(event.newAmount).toFixed(2)}`
                     ) : (
                       `€${Number(event.amount).toFixed(2)} — ${MONTHS[event.month - 1]} ${event.year}${event.note ? ` (${event.note})` : ''}`
                     )}
@@ -120,6 +140,10 @@ export default async function ActivityLogPage() {
                     {event.kind === 'payment' ? (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">
                         Payment
+                      </span>
+                    ) : event.kind === 'balance_change' ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
+                        Balance import
                       </span>
                     ) : event.wasFixedDay ? (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">

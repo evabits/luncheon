@@ -23,6 +23,7 @@ export const participants = pgTable('participants', {
   avatarUrl: text('avatar_url'),
   isActive: boolean('is_active').notNull().default(true),
   companyId: uuid('company_id').references(() => companies.id),
+  startingBalance: numeric('starting_balance', { precision: 10, scale: 2 }).notNull().default('0'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -127,6 +128,14 @@ export const paymentLinks = pgTable('payment_links', {
   amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
   paid: boolean('paid').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const startingBalanceChanges = pgTable('starting_balance_changes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  participantId: uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  oldAmount: numeric('old_amount', { precision: 10, scale: 2 }).notNull(),
+  newAmount: numeric('new_amount', { precision: 10, scale: 2 }).notNull(),
+  changedAt: timestamp('changed_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
 // Temporary setup codes for kiosk device activation (short-lived)

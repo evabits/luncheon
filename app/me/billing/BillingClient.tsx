@@ -25,9 +25,13 @@ interface PaymentRow {
 export function BillingClient({
   history,
   payments,
+  startingBalance,
+  cumulativeBalance,
 }: {
   history: HistoryRow[]
   payments: PaymentRow[]
+  startingBalance: string
+  cumulativeBalance: string
 }) {
   // Group attended sessions by year-month
   const attended = history.filter((r) => r.attended)
@@ -51,11 +55,31 @@ export function BillingClient({
   const allKeys = new Set([...sessionsByMonth.keys(), ...paymentsByMonth.keys()])
   const sortedKeys = Array.from(allKeys).sort((a, b) => b.localeCompare(a))
 
-  if (sortedKeys.length === 0) {
-    return <p className="text-gray-500 dark:text-gray-400">No billing history yet.</p>
-  }
+  const cumulative = Number(cumulativeBalance)
+  const hasStartingBalance = Number(startingBalance) !== 0
 
   return (
+    <div className="space-y-6">
+      {hasStartingBalance && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-5 py-4">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            Historical balance from before the app:{' '}
+            <strong className="tabular-nums">€{Number(startingBalance).toFixed(2)}</strong>
+          </p>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 px-5 py-4 flex items-center justify-between">
+        <span className="text-sm text-gray-500 dark:text-gray-400">Overall outstanding balance</span>
+        <span className={`text-xl font-bold tabular-nums ${cumulative > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+          €{cumulative.toFixed(2)}
+        </span>
+      </div>
+
+      {sortedKeys.length === 0 && !hasStartingBalance && (
+        <p className="text-gray-500 dark:text-gray-400">No billing history yet.</p>
+      )}
+
     <div className="space-y-8">
       {sortedKeys.map((key) => {
         const [yearStr, monthStr] = key.split('-')
@@ -133,6 +157,7 @@ export function BillingClient({
           </div>
         )
       })}
+    </div>
     </div>
   )
 }

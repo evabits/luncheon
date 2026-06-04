@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { AvatarInitials } from '@/components/ui/avatar-initials'
 import { ParticipantModal } from './ParticipantModal'
@@ -14,6 +15,7 @@ interface Participant {
   isActive: boolean
   companyId: string | null
   companyName: string | null
+  startingBalance: string | null
   createdAt: Date
 }
 
@@ -71,6 +73,12 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+        <Link
+          href="/admin/participants/import-balance"
+          className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        >
+          Import balances
+        </Link>
         <button
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"

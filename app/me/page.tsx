@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { getParticipantHistory } from '@/lib/queries/sessions'
+import { getParticipantPaymentHistory, getParticipantOverallBalance } from '@/lib/queries/payments'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +22,12 @@ export default async function MePage() {
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
 
-  const allHistory = await getParticipantHistory(participantId)
+  const [allHistory, allPayments, overall] = await Promise.all([
+    getParticipantHistory(participantId),
+    getParticipantPaymentHistory(participantId),
+    getParticipantOverallBalance(participantId),
+  ])
+
   const thisMonthHistory = allHistory.filter((h) => {
     const d = new Date(h.date)
     return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth
@@ -29,13 +35,32 @@ export default async function MePage() {
   const attended = thisMonthHistory.filter((h) => h.attended)
   const totalCost = attended.reduce((s, h) => s + Number(h.cost), 0)
 
+  const thisMonthPaid = allPayments
+    .filter((p) => p.year === currentYear && p.month === currentMonth)
+    .reduce((s, p) => s + Number(p.amount), 0)
+
+  const previousMonthsCost = allHistory
+    .filter((h) => {
+      if (!h.attended) return false
+      const d = new Date(h.date + 'T12:00:00')
+      return d.getFullYear() < currentYear || (d.getFullYear() === currentYear && d.getMonth() + 1 < currentMonth)
+    })
+    .reduce((s, h) => s + Number(h.cost), 0)
+
+  const previousMonthsPaid = allPayments
+    .filter((p) => p.year < currentYear || (p.year === currentYear && p.month < currentMonth))
+    .reduce((s, p) => s + Number(p.amount), 0)
+
+  const unpaidPreviousMonths = Number(overall.starting_balance) + previousMonthsCost - previousMonthsPaid
+  const totalBalance = Number(overall.cumulative_balance)
+
   const monthName = now.toLocaleDateString('en-US', { month: 'long' })
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Lunch Summary</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
           <div className="text-sm text-gray-500 dark:text-gray-400">{monthName} lunches</div>
           <div className="text-4xl font-bold text-gray-900 dark:text-white mt-1">{attended.length}</div>
@@ -43,6 +68,18 @@ export default async function MePage() {
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
           <div className="text-sm text-gray-500 dark:text-gray-400">{monthName} cost</div>
           <div className="text-4xl font-bold text-gray-900 dark:text-white mt-1">€{totalCost.toFixed(2)}</div>
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Unpaid bills</div>
+          <div className={`text-4xl font-bold mt-1 ${unpaidPreviousMonths > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`}>
+            €{unpaidPreviousMonths.toFixed(2)}
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Total balance</div>
+          <div className={`text-4xl font-bold mt-1 ${totalBalance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+            €{totalBalance.toFixed(2)}
+          </div>
         </div>
       </div>
 
