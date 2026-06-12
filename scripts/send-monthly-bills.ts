@@ -66,14 +66,14 @@ async function main() {
     }
 
     try {
-      const totalOwed = Number(row.cumulative_balance)
+      const totalDue = Number(row.cumulative_balance)
       let paymentUrl: string | null = null
-      if (process.env.MOLLIE_API_KEY && totalOwed > 0) {
+      if (process.env.MOLLIE_API_KEY && totalDue > 0) {
         try {
           const description = `Lunch ${monthNames[month - 1]} ${year} - ${row.name}`
           const appUrl = process.env.APP_URL
           const webhookUrl = appUrl ? `${appUrl}/api/webhooks/mollie` : undefined
-          const { url, id } = await createMolliePaymentLink(totalOwed, description, webhookUrl)
+          const { url, id } = await createMolliePaymentLink(totalDue, description, webhookUrl)
           paymentUrl = url
           await insertPaymentLink(id, row.id, year, month, row.cumulative_balance)
         } catch (mollieErr) {
@@ -88,7 +88,8 @@ async function main() {
         sessions: row.sessions,
         totalCost: row.total_cost,
         totalPaid: row.total_paid,
-        balance: row.balance,
+        previousBalance: row.previous_balance,
+        totalDue: row.cumulative_balance,
         paymentInstructions,
         paymentUrl,
       })

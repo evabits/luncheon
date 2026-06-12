@@ -125,6 +125,25 @@ export async function getMonthlyBillingWithEmails(year: number, month: number) {
           WHERE pay.participant_id = p.id
         ), 0)
       )::numeric AS cumulative_balance,
+      (
+        p.starting_balance::numeric +
+        COALESCE((
+          SELECT SUM(ls2.cost::numeric)
+          FROM attendances a2
+          JOIN lunch_sessions ls2 ON ls2.id = a2.session_id
+          WHERE a2.participant_id = p.id
+            AND (
+              EXTRACT(YEAR FROM ls2.date::date) < ${year} OR
+              (EXTRACT(YEAR FROM ls2.date::date) = ${year} AND EXTRACT(MONTH FROM ls2.date::date) < ${month})
+            )
+        ), 0) -
+        COALESCE((
+          SELECT SUM(pay.amount::numeric)
+          FROM payments pay
+          WHERE pay.participant_id = p.id
+            AND (pay.year < ${year} OR (pay.year = ${year} AND pay.month < ${month}))
+        ), 0)
+      )::numeric AS previous_balance,
       COALESCE(
         json_agg(
           json_build_object('date', ls.date::text, 'cost', ls.cost::text)
@@ -152,6 +171,7 @@ export async function getMonthlyBillingWithEmails(year: number, month: number) {
     total_paid: string
     balance: string
     cumulative_balance: string
+    previous_balance: string
     sessions: Array<{ date: string; cost: string }>
   }>
 }

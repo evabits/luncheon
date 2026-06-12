@@ -10,13 +10,14 @@ interface BillTemplateOptions {
   sessions: Array<{ date: string; cost: string }>
   totalCost: string
   totalPaid: string
-  balance: string
+  previousBalance: string
+  totalDue: string
   paymentInstructions: string | null
   paymentUrl?: string | null
 }
 
 export function buildBillEmail(opts: BillTemplateOptions): string {
-  const { name, year, month, sessions, totalCost, totalPaid, balance, paymentInstructions, paymentUrl } = opts
+  const { name, year, month, sessions, totalCost, totalPaid, previousBalance, totalDue, paymentInstructions, paymentUrl } = opts
   const monthName = MONTH_NAMES[month - 1]
 
   const rows = sessions
@@ -69,16 +70,20 @@ export function buildBillEmail(opts: BillTemplateOptions): string {
 
   <table style="width:100%;border-collapse:collapse;margin-top:16px;background:#f9fafb;border-radius:8px;overflow:hidden;">
     <tr>
-      <td style="padding:8px 12px;color:#6b7280;">Total charged</td>
+      <td style="padding:8px 12px;color:#6b7280;">Total charged this month</td>
       <td style="padding:8px 12px;text-align:right;">€${totalCost}</td>
     </tr>
     <tr>
-      <td style="padding:8px 12px;color:#6b7280;">Payments received</td>
+      <td style="padding:8px 12px;color:#6b7280;">Payments received this month</td>
       <td style="padding:8px 12px;text-align:right;">€${totalPaid}</td>
     </tr>
+    ${Number(previousBalance) !== 0 ? `<tr>
+      <td style="padding:8px 12px;color:#6b7280;">Previous unpaid balance</td>
+      <td style="padding:8px 12px;text-align:right;">€${previousBalance}</td>
+    </tr>` : ''}
     <tr style="font-weight:700;font-size:16px;">
-      <td style="padding:10px 12px;">Balance due</td>
-      <td style="padding:10px 12px;text-align:right;">€${balance}</td>
+      <td style="padding:10px 12px;">Total amount due</td>
+      <td style="padding:10px 12px;text-align:right;">€${totalDue}</td>
     </tr>
   </table>
 
