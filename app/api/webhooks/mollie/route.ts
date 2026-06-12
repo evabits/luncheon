@@ -10,23 +10,42 @@ export async function POST(req: NextRequest) {
   const params = new URLSearchParams(body)
   const paymentId = params.get('id')
 
-  if (!paymentId) return NextResponse.json({ ok: true })
+  console.log('[mollie-webhook] received id:', paymentId)
+
+  if (!paymentId) {
+    console.log('[mollie-webhook] no id in body, skipping')
+    return NextResponse.json({ ok: true })
+  }
 
   const payment = await fetchMolliePayment(paymentId)
-  if (!payment || payment.status !== 'paid') return NextResponse.json({ ok: true })
+  console.log('[mollie-webhook] payment status:', payment?.status, '| _links:', JSON.stringify(payment?._links))
 
-  // Extract payment link ID from the payment's _links (e.g. ".../payment-links/pl_xxx")
+  if (!payment || payment.status !== 'paid') {
+    console.log('[mollie-webhook] not paid yet, skipping')
+    return NextResponse.json({ ok: true })
+  }
+
   const paymentLinkHref = payment._links.paymentLink?.href
-  if (!paymentLinkHref) return NextResponse.json({ ok: true })
+  console.log('[mollie-webhook] paymentLinkHref:', paymentLinkHref)
+
+  if (!paymentLinkHref) {
+    console.log('[mollie-webhook] no paymentLink in _links, skipping')
+    return NextResponse.json({ ok: true })
+  }
 
   const mollieId = paymentLinkHref.split('/').pop()
+  console.log('[mollie-webhook] mollieId:', mollieId)
+
   if (!mollieId) return NextResponse.json({ ok: true })
 
   const link = await getPaymentLinkByMollieId(mollieId)
+  console.log('[mollie-webhook] db link:', link ? `found (paid=${link.paid})` : 'not found')
+
   if (!link || link.paid) return NextResponse.json({ ok: true })
 
   await recordPayment(link.participantId, link.year, link.month, payment.amount.value, 'Mollie', paymentId)
   await markPaymentLinkPaid(mollieId)
+  console.log('[mollie-webhook] recorded payment and marked link paid')
 
   return NextResponse.json({ ok: true })
 }
