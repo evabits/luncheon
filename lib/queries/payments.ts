@@ -118,6 +118,10 @@ export async function getMonthlyBillingWithEmails(year: number, month: number) {
           FROM attendances a2
           JOIN lunch_sessions ls2 ON ls2.id = a2.session_id
           WHERE a2.participant_id = p.id
+            AND (
+              EXTRACT(YEAR FROM ls2.date::date) < ${year} OR
+              (EXTRACT(YEAR FROM ls2.date::date) = ${year} AND EXTRACT(MONTH FROM ls2.date::date) <= ${month})
+            )
         ), 0) -
         COALESCE((
           SELECT SUM(pay.amount::numeric)
