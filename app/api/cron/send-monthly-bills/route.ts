@@ -53,8 +53,8 @@ export async function GET(req: NextRequest) {
       if (process.env.MOLLIE_API_KEY && totalDue > 0) {
         try {
           const description = `Lunch ${monthName} ${year} - ${row.name}`
-          const host = req.headers.get('host') ?? ''
-          const webhookUrl = `https://${host}/api/webhooks/mollie`
+          const appUrl = process.env.APP_URL ?? `https://${req.headers.get('host') ?? ''}`
+          const webhookUrl = `${appUrl}/api/webhooks/mollie`
           const { url, id } = await createMolliePaymentLink(totalDue, description, webhookUrl)
           paymentUrl = url
           await insertPaymentLink(id, row.id, year, month, row.cumulative_balance)
