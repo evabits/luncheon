@@ -59,8 +59,8 @@ async function main() {
       continue
     }
 
-    if (row.lunch_count === 0) {
-      console.log(`✗ skipped (0 lunches): ${row.name}`)
+    if (Number(row.cumulative_balance) <= 0) {
+      console.log(`✗ skipped (no balance): ${row.name}`)
       skipped++
       continue
     }

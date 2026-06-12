@@ -42,8 +42,8 @@ export async function GET(req: NextRequest) {
       results.push({ name: row.name, status: 'skipped', reason: 'no email' })
       continue
     }
-    if (row.lunch_count === 0) {
-      results.push({ name: row.name, status: 'skipped', reason: '0 lunches' })
+    if (Number(row.cumulative_balance) <= 0) {
+      results.push({ name: row.name, status: 'skipped', reason: 'no balance' })
       continue
     }
 
