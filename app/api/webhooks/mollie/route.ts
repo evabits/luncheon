@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   const link = await getPaymentLinkByMollieId(mollieId)
   if (!link || link.paid) return NextResponse.json({ ok: true })
 
-  await recordPayment(link.participantId, link.year, link.month, payment.amount.value, 'Mollie')
+  await recordPayment(link.participantId, link.year, link.month, payment.amount.value, 'Mollie', paymentId)
   await markPaymentLinkPaid(mollieId)
 
   return NextResponse.json({ ok: true })

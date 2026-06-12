@@ -181,11 +181,13 @@ export async function recordPayment(
   year: number,
   month: number,
   amount: string,
-  note?: string
+  note?: string,
+  molliePaymentId?: string,
 ) {
   const [created] = await db
     .insert(payments)
-    .values({ participantId, year, month, amount, note: note ?? null })
+    .values({ participantId, year, month, amount, note: note ?? null, molliePaymentId: molliePaymentId ?? null })
+    .onConflictDoNothing()
     .returning()
   return created
 }

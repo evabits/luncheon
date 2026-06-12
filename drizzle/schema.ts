@@ -104,6 +104,7 @@ export const payments = pgTable('payments', {
   month: integer('month').notNull(),
   amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
   note: text('note'),
+  molliePaymentId: text('mollie_payment_id').unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

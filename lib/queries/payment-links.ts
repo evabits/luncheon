@@ -2,6 +2,13 @@ import { db } from '../db'
 import { paymentLinks } from '@/drizzle/schema'
 import { eq } from 'drizzle-orm'
 
+export async function getUnpaidPaymentLinks() {
+  return db
+    .select()
+    .from(paymentLinks)
+    .where(eq(paymentLinks.paid, false))
+}
+
 export async function insertPaymentLink(
   mollieId: string,
   participantId: string,

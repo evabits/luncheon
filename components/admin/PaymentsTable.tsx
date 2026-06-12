@@ -41,6 +41,18 @@ export function PaymentsTable({
   const [payMonth, setPayMonth] = useState(month)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<{ synced: number; alreadyPaid: number; errors: string[] } | null>(null)
+
+  async function handleSync() {
+    setSyncing(true)
+    setSyncResult(null)
+    const res = await fetch('/api/admin/payments/reconcile', { method: 'POST' })
+    const data = await res.json()
+    setSyncResult(data)
+    setSyncing(false)
+    if (data.synced > 0) router.refresh()
+  }
 
   function openDialog() {
     setSelectedId(rows[0]?.id ?? '')
@@ -86,7 +98,25 @@ export function PaymentsTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        {syncResult && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {syncResult.synced > 0
+              ? `Synced ${syncResult.synced} payment${syncResult.synced !== 1 ? 's' : ''}`
+              : syncResult.alreadyPaid > 0
+              ? 'Already up to date'
+              : syncResult.errors.length > 0
+              ? `${syncResult.errors.length} error${syncResult.errors.length !== 1 ? 's' : ''}`
+              : 'No pending payments found'}
+          </p>
+        )}
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+        >
+          {syncing ? 'Syncing…' : 'Sync from Mollie'}
+        </button>
         <button
           onClick={openDialog}
           className="px-4 py-2 text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100"
