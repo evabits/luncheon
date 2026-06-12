@@ -71,6 +71,13 @@
       "when": 1780313047045,
       "tag": "0009_dry_veda",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781254476486,
+      "tag": "0010_wakeful_black_tom",
+      "breakpoints": true
     }
   ]
 }
