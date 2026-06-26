@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Pagination, PAGE_SIZE } from './Pagination'
 
 interface User {
   id: string
@@ -317,6 +318,18 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
   const [showCreate, setShowCreate] = useState(false)
   const [resetTarget, setResetTarget] = useState<User | null>(null)
   const [linkTarget, setLinkTarget] = useState<User | null>(null)
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+
+  const q = search.trim().toLowerCase()
+  const filtered = q
+    ? userList.filter((u) =>
+        u.email.toLowerCase().includes(q) ||
+        u.role.includes(q) ||
+        (u.participantName ?? '').toLowerCase().includes(q))
+    : userList
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1))
+  const paged = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
 
   async function refresh() {
     const res = await fetch('/api/admin/users')
@@ -347,7 +360,14 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
 
   return (
     <>
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
+          placeholder="Search by email, role or participant…"
+          className="flex-1 min-w-48 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400"
+        />
         <button
           onClick={() => setShowCreate(true)}
           className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
@@ -358,7 +378,7 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
 
       {/* Mobile card list */}
       <div className="sm:hidden space-y-3">
-        {userList.map((u) => (
+        {paged.map((u) => (
           <div key={u.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium text-gray-900 dark:text-white break-all">{u.email}</span>
@@ -428,6 +448,7 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
             </div>
           </div>
         ))}
+        <Pagination page={currentPage} total={filtered.length} onPage={setPage} />
       </div>
 
       {/* Desktop table */}
@@ -442,7 +463,7 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {userList.map((u) => (
+            {paged.map((u) => (
               <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -520,6 +541,7 @@ export function UsersClient({ initialUsers, currentEmail }: { initialUsers: User
             ))}
           </tbody>
         </table>
+        <Pagination page={currentPage} total={filtered.length} onPage={setPage} />
       </div>
 
       {showCreate && (

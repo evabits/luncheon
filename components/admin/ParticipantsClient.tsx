@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { AvatarInitials } from '@/components/ui/avatar-initials'
 import { ParticipantModal } from './ParticipantModal'
 import { CreateUserModal } from './CreateUserModal'
+import { Pagination, PAGE_SIZE } from './Pagination'
 
 interface Participant {
   id: string
@@ -26,6 +27,7 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
   const [creatingUserFor, setCreatingUserFor] = useState<Participant | null>(null)
   const [search, setSearch] = useState('')
   const [companyFilter, setCompanyFilter] = useState('')
+  const [page, setPage] = useState(0)
 
   async function refresh() {
     const res = await fetch('/api/admin/participants')
@@ -53,19 +55,22 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
     return true
   })
 
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1))
+  const paged = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
+
   return (
     <>
       <div className="flex flex-wrap gap-2 mb-4">
         <input
           type="search"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
           placeholder="Search by name, email or company…"
           className="flex-1 min-w-48 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400"
         />
         <select
           value={companyFilter}
-          onChange={(e) => setCompanyFilter(e.target.value)}
+          onChange={(e) => { setCompanyFilter(e.target.value); setPage(0) }}
           className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400"
         >
           <option value="">All companies</option>
@@ -104,7 +109,7 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
                 </td>
               </tr>
             )}
-            {filtered.map((p) => (
+            {paged.map((p) => (
               <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
@@ -171,6 +176,7 @@ export function ParticipantsClient({ initialParticipants }: { initialParticipant
             ))}
           </tbody>
         </table>
+        <Pagination page={currentPage} total={filtered.length} onPage={setPage} />
       </div>
 
       {(showAddModal || editingParticipant) && (
