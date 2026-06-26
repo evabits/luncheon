@@ -55,9 +55,10 @@ export async function GET(req: NextRequest) {
           const description = `Lunch ${monthName} ${year} - ${row.name}`
           const appUrl = process.env.APP_URL ?? `https://${req.headers.get('host') ?? ''}`
           const webhookUrl = `${appUrl}/api/webhooks/mollie`
-          const { url, id } = await createMolliePaymentLink(totalDue, description, webhookUrl)
-          paymentUrl = url
+          const { id } = await createMolliePaymentLink(totalDue, description, webhookUrl)
           await insertPaymentLink(id, row.id, year, month, row.cumulative_balance)
+          // Link through our own domain (not paymentlink.mollie.com) to dodge "link may be malicious" warnings
+          paymentUrl = `${appUrl}/pay/${id}`
         } catch (mollieErr) {
           console.error(`[send-monthly-bills] Mollie payment link failed for ${row.name}:`, mollieErr instanceof Error ? mollieErr.message : String(mollieErr))
         }

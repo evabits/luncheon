@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
@@ -58,6 +60,23 @@ export function BillingClient({
   const cumulative = Number(cumulativeBalance)
   const hasStartingBalance = Number(startingBalance) !== 0
 
+  const [paying, setPaying] = useState(false)
+  async function payNow() {
+    setPaying(true)
+    try {
+      const res = await fetch('/api/me/pay', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.url) {
+        window.location.href = data.url
+        return
+      }
+      alert(data.error ?? 'Could not start payment. Please try again.')
+    } catch {
+      alert('Could not start payment. Please try again.')
+    }
+    setPaying(false)
+  }
+
   return (
     <div className="space-y-6">
       {hasStartingBalance && (
@@ -69,11 +88,22 @@ export function BillingClient({
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 px-5 py-4 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 px-5 py-4 flex items-center justify-between gap-4">
         <span className="text-sm text-gray-500 dark:text-gray-400">Overall outstanding balance</span>
-        <span className={`text-xl font-bold tabular-nums ${cumulative > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-          €{cumulative.toFixed(2)}
-        </span>
+        <div className="flex items-center gap-4">
+          {cumulative > 0 && (
+            <button
+              onClick={payNow}
+              disabled={paying}
+              className="rounded-lg bg-gray-900 dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:opacity-90 disabled:opacity-50"
+            >
+              {paying ? 'Starting…' : 'Pay now'}
+            </button>
+          )}
+          <span className={`text-xl font-bold tabular-nums ${cumulative > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+            €{cumulative.toFixed(2)}
+          </span>
+        </div>
       </div>
 
       {sortedKeys.length === 0 && !hasStartingBalance && (
