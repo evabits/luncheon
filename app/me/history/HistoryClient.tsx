@@ -16,8 +16,8 @@ const cutoff = new Date(today)
 cutoff.setDate(cutoff.getDate() - 30)
 
 function isRemovable(date: string) {
-  const d = new Date(date + 'T12:00:00')
-  return d < today && d >= cutoff
+  const d = new Date(date + 'T00:00:00')
+  return d <= today && d >= cutoff
 }
 
 export function HistoryClient({ history: initialHistory }: { history: HistoryRow[] }) {

@@ -20,14 +20,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ s
 
   if (!lunchSession) return NextResponse.json({ error: 'Session not found' }, { status: 404 })
 
-  // Validate within last 30 days and not future
-  const sessionDate = new Date(lunchSession.date + 'T12:00:00')
+  // Validate within last 30 days and not future (today allowed)
+  const sessionDate = new Date(lunchSession.date + 'T00:00:00')
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const cutoff = new Date(today)
   cutoff.setDate(cutoff.getDate() - 30)
 
-  if (sessionDate >= today || sessionDate < cutoff) {
+  if (sessionDate > today || sessionDate < cutoff) {
     return NextResponse.json({ error: 'Session out of allowed range' }, { status: 400 })
   }
 
