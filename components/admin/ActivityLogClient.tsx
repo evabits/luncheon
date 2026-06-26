@@ -13,13 +13,19 @@ export type Event =
   | { kind: 'payment'; id: string; timestamp: Date; participantName: string; year: number; month: number; amount: string; note: string | null }
   | { kind: 'balance_change'; id: string; timestamp: Date; participantName: string; oldAmount: string; newAmount: string }
 
+function typeLabel(e: Event): string {
+  if (e.kind === 'payment') return 'Payment'
+  if (e.kind === 'balance_change') return 'Balance import'
+  return e.wasFixedDay ? 'Fixed day override' : 'Manual'
+}
+
 export function ActivityLogClient({ events }: { events: Event[] }) {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
 
   const q = search.trim().toLowerCase()
   const filtered = q
-    ? events.filter((e) => e.participantName.toLowerCase().includes(q) || e.kind.includes(q))
+    ? events.filter((e) => e.participantName.toLowerCase().includes(q) || typeLabel(e).toLowerCase().includes(q))
     : events
   const currentPage = Math.min(page, Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1))
   const paged = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
