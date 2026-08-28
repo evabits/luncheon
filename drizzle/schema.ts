@@ -155,7 +155,7 @@ export const shoppingItems = pgTable('shopping_items', {
   jumboUrl: text('jumbo_url'),
   price: numeric('price', { precision: 10, scale: 2 }),
   isActive: boolean('is_active').notNull().default(true),
-  // provenance only — plain uuid (no FK) to avoid a circular reference with shopping_requests
+  // provenance only — deliberately no FK: keeps the link even if the source request row is later removed
   createdFromRequestId: uuid('created_from_request_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
