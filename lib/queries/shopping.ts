@@ -162,6 +162,8 @@ export async function restockItem(id: string): Promise<void> {
 // ---- Requests ----
 
 export async function countMonthlyRequests(participantId: string): Promise<number> {
+  // currentMonthRange yields UTC month boundaries; the ::date comparison below assumes
+  // the Postgres session is UTC (Neon's default), consistent with the rest of the app.
   const { start, end } = currentMonthRange(new Date())
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
@@ -247,25 +249,26 @@ export async function toggleVote(
   requestId: string,
   participantId: string
 ): Promise<{ voted: boolean }> {
-  const [existing] = await db
-    .select({ id: shoppingRequestVotes.id })
-    .from(shoppingRequestVotes)
+  // Idempotent toggle: try to insert first. onConflictDoNothing means a concurrent
+  // double-tap can't 500 on the (request_id, participant_id) unique constraint — the
+  // losing insert returns no rows and falls through to the delete branch instead.
+  const inserted = await db
+    .insert(shoppingRequestVotes)
+    .values({ requestId, participantId })
+    .onConflictDoNothing()
+    .returning({ id: shoppingRequestVotes.id })
+
+  if (inserted.length > 0) return { voted: true }
+
+  await db
+    .delete(shoppingRequestVotes)
     .where(
       and(
         eq(shoppingRequestVotes.requestId, requestId),
         eq(shoppingRequestVotes.participantId, participantId)
       )
     )
-    .limit(1)
-
-  if (existing) {
-    await db
-      .delete(shoppingRequestVotes)
-      .where(eq(shoppingRequestVotes.id, existing.id))
-    return { voted: false }
-  }
-  await db.insert(shoppingRequestVotes).values({ requestId, participantId })
-  return { voted: true }
+  return { voted: false }
 }
 
 export async function approveRequest(
