@@ -5,11 +5,13 @@ import { useState } from 'react'
 interface SettingsFormProps {
   initialCost: number
   initialPaymentInstructions: string
+  initialRequestsPerMonth: number
 }
 
-export function SettingsForm({ initialCost, initialPaymentInstructions }: SettingsFormProps) {
+export function SettingsForm({ initialCost, initialPaymentInstructions, initialRequestsPerMonth }: SettingsFormProps) {
   const [cost, setCost] = useState(String(initialCost))
   const [paymentInstructions, setPaymentInstructions] = useState(initialPaymentInstructions)
+  const [requestsPerMonth, setRequestsPerMonth] = useState(initialRequestsPerMonth)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -24,7 +26,7 @@ export function SettingsForm({ initialCost, initialPaymentInstructions }: Settin
       const res = await fetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null }),
+        body: JSON.stringify({ costPerLunch: Number(cost), paymentInstructions: paymentInstructions || null, shoppingRequestsPerMonth: requestsPerMonth }),
       })
       if (!res.ok) throw new Error()
       setSaved(true)
@@ -66,6 +68,17 @@ export function SettingsForm({ initialCost, initialPaymentInstructions }: Settin
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Shown at the bottom of monthly billing emails.
         </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Shopping requests per person per month</label>
+        <input
+          type="number"
+          value={requestsPerMonth}
+          onChange={(e) => setRequestsPerMonth(parseInt(e.target.value, 10) || 0)}
+          min={0}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800"
+        />
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}

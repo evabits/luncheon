@@ -9,10 +9,14 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { costPerLunch, paymentInstructions } = await req.json()
+  const { costPerLunch, paymentInstructions, shoppingRequestsPerMonth } = await req.json()
 
   if (costPerLunch === undefined || isNaN(Number(costPerLunch))) {
     return NextResponse.json({ error: 'Invalid cost' }, { status: 400 })
+  }
+  const quota = Number(shoppingRequestsPerMonth)
+  if (shoppingRequestsPerMonth !== undefined && (!Number.isInteger(quota) || quota < 0)) {
+    return NextResponse.json({ error: 'Invalid request quota' }, { status: 400 })
   }
 
   const existing = await getConfig()
@@ -20,6 +24,8 @@ export async function PATCH(req: NextRequest) {
   const values = {
     costPerLunch: String(costPerLunch),
     paymentInstructions: paymentInstructions ?? null,
+    shoppingRequestsPerMonth:
+      shoppingRequestsPerMonth === undefined ? (existing?.shoppingRequestsPerMonth ?? 1) : quota,
     updatedAt: new Date(),
   }
 
