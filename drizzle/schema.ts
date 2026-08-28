@@ -76,6 +76,7 @@ export const config = pgTable('config', {
   id: uuid('id').primaryKey().defaultRandom(),
   costPerLunch: numeric('cost_per_lunch', { precision: 10, scale: 2 }).notNull().default('85.00'),
   paymentInstructions: text('payment_instructions'),
+  shoppingRequestsPerMonth: integer('shopping_requests_per_month').notNull().default(1),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -147,3 +148,63 @@ export const kioskSetupCodes = pgTable('kiosk_setup_codes', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   usedAt: timestamp('used_at', { withTimezone: true }),
 })
+
+export const shoppingItems = pgTable('shopping_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  jumboUrl: text('jumbo_url'),
+  price: numeric('price', { precision: 10, scale: 2 }),
+  isActive: boolean('is_active').notNull().default(true),
+  // provenance only — plain uuid (no FK) to avoid a circular reference with shopping_requests
+  createdFromRequestId: uuid('created_from_request_id'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const shoppingRequests = pgTable('shopping_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  jumboUrl: text('jumbo_url'),
+  price: numeric('price', { precision: 10, scale: 2 }),
+  requestedBy: uuid('requested_by')
+    .notNull()
+    .references(() => participants.id, { onDelete: 'cascade' }),
+  status: text('status', { enum: ['pending', 'approved', 'denied'] })
+    .notNull()
+    .default('pending'),
+  denyReason: text('deny_reason'),
+  resolvedBy: uuid('resolved_by').references(() => users.id),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  approvedItemId: uuid('approved_item_id').references(() => shoppingItems.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const shoppingItemFlags = pgTable(
+  'shopping_item_flags',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    itemId: uuid('item_id')
+      .notNull()
+      .references(() => shoppingItems.id, { onDelete: 'cascade' }),
+    participantId: uuid('participant_id')
+      .notNull()
+      .references(() => participants.id, { onDelete: 'cascade' }),
+    level: text('level', { enum: ['low', 'out'] }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.itemId, t.participantId)]
+)
+
+export const shoppingRequestVotes = pgTable(
+  'shopping_request_votes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    requestId: uuid('request_id')
+      .notNull()
+      .references(() => shoppingRequests.id, { onDelete: 'cascade' }),
+    participantId: uuid('participant_id')
+      .notNull()
+      .references(() => participants.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.requestId, t.participantId)]
+)
