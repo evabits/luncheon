@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { createItem, updateItem, removeItem } from '@/lib/queries/shopping'
+import { createItem, updateItem, removeItem, safeHttpUrl } from '@/lib/queries/shopping'
 
 async function requireAdmin() {
   const session = await auth()
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   if (price !== null && isNaN(Number(price))) {
     return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
   }
-  await createItem({ name, jumboUrl: body.jumboUrl ? String(body.jumboUrl).trim() : null, price })
+  await createItem({ name, jumboUrl: safeHttpUrl(body.jumboUrl ? String(body.jumboUrl) : null), price })
   return NextResponse.json({ success: true })
 }
 
@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest) {
   if (price !== null && isNaN(Number(price))) {
     return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
   }
-  await updateItem(id, { name, jumboUrl: body.jumboUrl ? String(body.jumboUrl).trim() : null, price })
+  await updateItem(id, { name, jumboUrl: safeHttpUrl(body.jumboUrl ? String(body.jumboUrl) : null), price })
   return NextResponse.json({ success: true })
 }
 

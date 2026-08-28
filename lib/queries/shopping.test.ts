@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test'
-import { currentMonthRange, remainingRequests, summarizeFlags } from './shopping'
+import { currentMonthRange, remainingRequests, summarizeFlags, safeHttpUrl } from './shopping'
 
 test('currentMonthRange returns first-of-month to first-of-next-month (UTC)', () => {
   expect(currentMonthRange(new Date('2026-08-28T10:00:00Z'))).toEqual({
@@ -25,4 +25,13 @@ test('remainingRequests never goes negative', () => {
 test('summarizeFlags counts each level', () => {
   expect(summarizeFlags(['low', 'low', 'out', 'low'])).toEqual({ low: 3, out: 1 })
   expect(summarizeFlags([])).toEqual({ low: 0, out: 0 })
+})
+
+test('safeHttpUrl keeps http(s) urls and rejects other schemes', () => {
+  expect(safeHttpUrl('https://jumbo.com/x')).toBe('https://jumbo.com/x')
+  expect(safeHttpUrl('  http://jumbo.com  ')).toBe('http://jumbo.com')
+  expect(safeHttpUrl('javascript:alert(1)')).toBe(null)
+  expect(safeHttpUrl('data:text/html,x')).toBe(null)
+  expect(safeHttpUrl('   ')).toBe(null)
+  expect(safeHttpUrl(null)).toBe(null)
 })

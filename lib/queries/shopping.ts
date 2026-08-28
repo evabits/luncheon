@@ -24,6 +24,14 @@ export function remainingRequests(used: number, limit: number): number {
   return Math.max(0, limit - used)
 }
 
+// Only http(s) URLs are safe to store and later render into an <a href>.
+// Rejecting other schemes (javascript:, data:) at the write boundary prevents stored XSS.
+export function safeHttpUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  const trimmed = url.trim()
+  return /^https?:\/\//i.test(trimmed) ? trimmed : null
+}
+
 export function summarizeFlags(levels: ('low' | 'out')[]): {
   low: number
   out: number

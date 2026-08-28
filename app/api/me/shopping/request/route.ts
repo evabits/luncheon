@@ -6,6 +6,7 @@ import {
   createRequest,
   getAdminEmails,
   remainingRequests,
+  safeHttpUrl,
 } from '@/lib/queries/shopping'
 import { sendEmail } from '@/lib/mailer'
 
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
   const name = String(body.name ?? '').trim()
-  const jumboUrl = body.jumboUrl ? String(body.jumboUrl).trim() : null
+  const jumboUrl = safeHttpUrl(body.jumboUrl ? String(body.jumboUrl) : null)
   const price =
     body.price === '' || body.price === undefined || body.price === null
       ? null
