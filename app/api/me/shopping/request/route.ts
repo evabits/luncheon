@@ -9,6 +9,14 @@ import {
 } from '@/lib/queries/shopping'
 import { sendEmail } from '@/lib/mailer'
 
+// Requester-supplied text ends up in an admin's inbox, so escape it before it hits HTML.
+function escapeHtml(s: string): string {
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!
+  )
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth()
   const participantId = (session?.user as any)?.participantId
@@ -41,9 +49,11 @@ export async function POST(req: NextRequest) {
   // Email admins (best-effort — don't fail the request if mail is down)
   try {
     const admins = await getAdminEmails()
-    const html = `<p>A new shopping list item was requested: <strong>${name}</strong></p>` +
-      (price ? `<p>Price: €${price}</p>` : '') +
-      (jumboUrl ? `<p><a href="${jumboUrl}">Jumbo link</a></p>` : '') +
+    // Only surface the link if it's a real http(s) URL — never emit a raw javascript:/data: href.
+    const safeUrl = jumboUrl && /^https?:\/\//i.test(jumboUrl) ? escapeHtml(jumboUrl) : null
+    const html = `<p>A new shopping list item was requested: <strong>${escapeHtml(name)}</strong></p>` +
+      (price ? `<p>Price: €${escapeHtml(price)}</p>` : '') +
+      (safeUrl ? `<p><a href="${safeUrl}">Jumbo link</a></p>` : '') +
       `<p>Review it in the admin shopping list.</p>`
     await Promise.all(
       admins.map((email) => sendEmail(email, 'New shopping list request', html))
