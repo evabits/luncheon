@@ -34,7 +34,8 @@ export async function POST(req: NextRequest) {
       : String(body.price)
 
   if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
-  if (price !== null && isNaN(Number(price))) {
+  // numeric(10,2) tops out at 99,999,999.99; reject negatives/overflow so they 400 instead of DB-500.
+  if (price !== null && (isNaN(Number(price)) || Number(price) < 0 || Number(price) > 99999999.99)) {
     return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
   }
 

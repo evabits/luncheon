@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
   const name = String(body.name ?? '').trim()
   if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
   const price = parsePrice(body.price)
-  if (price !== null && isNaN(Number(price))) {
+  // numeric(10,2) tops out at 99,999,999.99; reject negatives/overflow so they 400 instead of DB-500.
+  if (price !== null && (isNaN(Number(price)) || Number(price) < 0 || Number(price) > 99999999.99)) {
     return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
   }
   await createItem({ name, jumboUrl: safeHttpUrl(body.jumboUrl ? String(body.jumboUrl) : null), price })
@@ -32,7 +33,8 @@ export async function PATCH(req: NextRequest) {
   const name = String(body.name ?? '').trim()
   if (!id || !name) return NextResponse.json({ error: 'Missing id or name' }, { status: 400 })
   const price = parsePrice(body.price)
-  if (price !== null && isNaN(Number(price))) {
+  // numeric(10,2) tops out at 99,999,999.99; reject negatives/overflow so they 400 instead of DB-500.
+  if (price !== null && (isNaN(Number(price)) || Number(price) < 0 || Number(price) > 99999999.99)) {
     return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
   }
   await updateItem(id, { name, jumboUrl: safeHttpUrl(body.jumboUrl ? String(body.jumboUrl) : null), price })

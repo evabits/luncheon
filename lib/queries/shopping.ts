@@ -290,6 +290,17 @@ export async function approveRequest(
     .limit(1)
   if (!req || req.status !== 'pending') return
 
+  // Claim the request with a guarded update FIRST. The status='pending' predicate is the
+  // single serialization point (Postgres row lock), so a concurrent double-approve only lets
+  // one caller through — the loser gets 0 rows back and returns without creating a duplicate item.
+  // No multi-statement transaction on the Neon HTTP driver, hence claim-then-insert.
+  const claimed = await db
+    .update(shoppingRequests)
+    .set({ status: 'approved', resolvedBy: adminUserId, resolvedAt: new Date() })
+    .where(and(eq(shoppingRequests.id, requestId), eq(shoppingRequests.status, 'pending')))
+    .returning({ id: shoppingRequests.id })
+  if (claimed.length === 0) return
+
   const [item] = await db
     .insert(shoppingItems)
     .values({
@@ -300,14 +311,11 @@ export async function approveRequest(
     })
     .returning({ id: shoppingItems.id })
 
+  // ponytail: brief window where the request is 'approved' but approvedItemId is still null
+  // (or a crash leaves it null) — harmless, the item exists and is on the list; this field is informational.
   await db
     .update(shoppingRequests)
-    .set({
-      status: 'approved',
-      approvedItemId: item.id,
-      resolvedBy: adminUserId,
-      resolvedAt: new Date(),
-    })
+    .set({ approvedItemId: item.id })
     .where(eq(shoppingRequests.id, requestId))
 }
 
