@@ -120,6 +120,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user, account }) {
       if (user) {
+        token.userId = (user as any).id
         token.role = (user as any).role
         token.participantId = (user as any).participantId
         token.mustChangePassword = (user as any).mustChangePassword
@@ -133,6 +134,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(users.email, token.email!))
           .limit(1)
         if (dbUser) {
+          token.userId = dbUser.id
           token.role = dbUser.role
           token.participantId = dbUser.participantId
           token.mustChangePassword = false
@@ -141,6 +143,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     session({ session, token }) {
+      ;(session.user as any).id = token.userId
       ;(session.user as any).role = token.role
       ;(session.user as any).participantId = token.participantId
       ;(session.user as any).mustChangePassword = token.mustChangePassword
