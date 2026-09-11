@@ -87,6 +87,10 @@ export function MeNav() {
         <Link href="/me/billing" className={linkClass('/me/billing')}>
           Billing
         </Link>
+
+        <Link href="/me/shopping" className={linkClass('/me/shopping')}>
+          Shopping
+        </Link>
       </nav>
 
       {/* Mobile hamburger */}
@@ -109,7 +113,7 @@ export function MeNav() {
 
         {mobileOpen && (
           <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1">
-            {[{ href: '/me', label: 'Dashboard' }].concat(lunchLinks).concat([{ href: '/me/billing', label: 'Billing' }]).map(({ href, label }) => (
+            {[{ href: '/me', label: 'Dashboard' }].concat(lunchLinks).concat([{ href: '/me/billing', label: 'Billing' }, { href: '/me/shopping', label: 'Shopping' }]).map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
