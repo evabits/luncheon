@@ -105,7 +105,7 @@ export function ShoppingRequests({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Item name"
-          className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm"
           required
           disabled={remaining <= 0}
         />
@@ -113,7 +113,7 @@ export function ShoppingRequests({
           value={jumboUrl}
           onChange={(e) => setJumboUrl(e.target.value)}
           placeholder="Jumbo product link (optional)"
-          className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm"
           disabled={remaining <= 0}
         />
         <input
@@ -121,7 +121,7 @@ export function ShoppingRequests({
           onChange={(e) => setPrice(e.target.value)}
           placeholder="Price € (optional)"
           inputMode="decimal"
-          className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm"
           disabled={remaining <= 0}
         />
         {error && <p className="text-sm text-red-600">{error}</p>}

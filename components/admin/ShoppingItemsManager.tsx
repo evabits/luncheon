@@ -57,11 +57,11 @@ export function ShoppingItemsManager({ items }: { items: Item[] }) {
 
       <form onSubmit={add} className="flex flex-wrap gap-2 items-end">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" required
-          className="rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm" />
+          className="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm" />
         <input value={jumboUrl} onChange={(e) => setJumboUrl(e.target.value)} placeholder="Jumbo link"
-          className="rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm" />
+          className="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm" />
         <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price €" inputMode="decimal"
-          className="w-24 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm" />
+          className="w-24 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm" />
         <button type="submit"
           className="px-4 py-2 rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900 text-sm font-medium">
           Add
