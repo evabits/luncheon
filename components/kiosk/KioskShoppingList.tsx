@@ -10,13 +10,18 @@ export function KioskShoppingList({ initialItems }: { initialItems: KioskShoppin
 
   async function setFlag(itemId: string, level: 'low' | 'out' | null) {
     setBusy(itemId)
-    await fetch('/api/kiosk/shopping/flag', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ itemId, level }),
-    })
-    setBusy(null)
-    router.refresh()
+    try {
+      await fetch('/api/kiosk/shopping/flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, level }),
+      })
+    } finally {
+      // Always re-enable: a failed request on flaky tablet wifi must not leave the
+      // buttons permanently disabled. The flag write is idempotent, so a retry is safe.
+      setBusy(null)
+      router.refresh()
+    }
   }
 
   if (initialItems.length === 0) {
