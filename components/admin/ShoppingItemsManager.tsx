@@ -8,6 +8,7 @@ type Item = {
   name: string
   jumboUrl: string | null
   price: string | null
+  kioskFlag: 'low' | 'out' | null
   low: number
   out: number
 }
@@ -78,6 +79,7 @@ export function ShoppingItemsManager({ items }: { items: Item[] }) {
                 {item.jumboUrl && <a href={item.jumboUrl} target="_blank" rel="noreferrer" className="underline">Jumbo</a>}
                 {item.low > 0 && <span>🟡 low ×{item.low}</span>}
                 {item.out > 0 && <span>🔴 out ×{item.out}</span>}
+                {item.kioskFlag && <span>🏪 kiosk: {item.kioskFlag}</span>}
               </div>
             </div>
             <div className="flex gap-2">

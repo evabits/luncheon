@@ -48,6 +48,7 @@ export function ShoppingList({ items }: { items: ShoppingItemView[] }) {
               )}
               {item.low > 0 && <span>🟡 low ×{item.low}</span>}
               {item.out > 0 && <span>🔴 out ×{item.out}</span>}
+              {item.kioskFlag && <span>🏪 kiosk: {item.kioskFlag}</span>}
             </div>
           </div>
           <div className="flex gap-2">

@@ -27,6 +27,7 @@ export default async function AdminShoppingPage() {
     name: i.name,
     jumboUrl: i.jumboUrl,
     price: i.price,
+    kioskFlag: i.kioskFlag,
     low: flags.filter((f) => f.itemId === i.id && f.level === 'low').length,
     out: flags.filter((f) => f.itemId === i.id && f.level === 'out').length,
   }))

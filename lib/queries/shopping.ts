@@ -7,7 +7,7 @@ import {
   users,
   participants,
 } from '@/drizzle/schema'
-import { and, eq, gte, lt, sql, inArray, desc } from 'drizzle-orm'
+import { and, eq, gte, lt, sql, inArray, desc, asc } from 'drizzle-orm'
 
 // ---- Pure helpers (unit-tested) ----
 
@@ -52,6 +52,7 @@ export type ShoppingItemView = {
   low: number
   out: number
   myLevel: 'low' | 'out' | null
+  kioskFlag: 'low' | 'out' | null
 }
 
 export type ShoppingRequestView = {
@@ -103,6 +104,7 @@ export async function getShoppingItems(
       low: summary.low,
       out: summary.out,
       myLevel: mine?.level ?? null,
+      kioskFlag: item.kioskFlag,
     }
   })
 }
@@ -165,6 +167,36 @@ export async function removeItem(id: string): Promise<void> {
 
 export async function restockItem(id: string): Promise<void> {
   await db.delete(shoppingItemFlags).where(eq(shoppingItemFlags.itemId, id))
+  await db.update(shoppingItems).set({ kioskFlag: null }).where(eq(shoppingItems.id, id))
+}
+
+export type KioskShoppingItemView = {
+  id: string
+  name: string
+  jumboUrl: string | null
+  price: string | null
+  kioskFlag: 'low' | 'out' | null
+}
+
+export async function getKioskShoppingItems(): Promise<KioskShoppingItemView[]> {
+  return db
+    .select({
+      id: shoppingItems.id,
+      name: shoppingItems.name,
+      jumboUrl: shoppingItems.jumboUrl,
+      price: shoppingItems.price,
+      kioskFlag: shoppingItems.kioskFlag,
+    })
+    .from(shoppingItems)
+    .where(eq(shoppingItems.isActive, true))
+    .orderBy(asc(shoppingItems.name))
+}
+
+export async function setKioskFlag(
+  itemId: string,
+  level: 'low' | 'out' | null
+): Promise<void> {
+  await db.update(shoppingItems).set({ kioskFlag: level }).where(eq(shoppingItems.id, itemId))
 }
 
 // ---- Requests ----
