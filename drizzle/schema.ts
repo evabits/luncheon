@@ -157,6 +157,7 @@ export const shoppingItems = pgTable('shopping_items', {
   isActive: boolean('is_active').notNull().default(true),
   // provenance only — deliberately no FK: keeps the link even if the source request row is later removed
   createdFromRequestId: uuid('created_from_request_id'),
+  kioskFlag: text('kiosk_flag', { enum: ['low', 'out'] }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
